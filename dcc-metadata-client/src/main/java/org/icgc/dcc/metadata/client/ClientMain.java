@@ -1,5 +1,4 @@
 /*
-
  * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
@@ -16,14 +15,14 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server;
+package org.icgc.dcc.metadata.client;
 
 import static com.google.common.base.Strings.repeat;
 import static java.lang.System.err;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.metadata.server.cli.ServerOptions;
+import org.icgc.dcc.metadata.client.cli.ClientOptions;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -32,7 +31,7 @@ import com.beust.jcommander.ParameterException;
 
 @Slf4j
 @SpringBootApplication
-public class ServerMain {
+public class ClientMain {
 
   /**
    * Constants.
@@ -42,7 +41,7 @@ public class ServerMain {
   public static final int FAILURE_STATUS_CODE = 1;
 
   public static void main(String[] args) {
-    val options = new ServerOptions();
+    val options = new ClientOptions();
     val cli = new JCommander(options);
     cli.setAcceptUnknownOptions(true);
     cli.setProgramName(APPLICATION_NAME);
@@ -63,8 +62,8 @@ public class ServerMain {
     }
   }
 
-  private static void execute(ServerOptions options, String[] args) {
-    SpringApplication.run(ServerMain.class, args);
+  private static void execute(ClientOptions options, String[] args) {
+    SpringApplication.run(ClientMain.class, args);
     log.info("{}\n", repeat("-", 100));
   }
 

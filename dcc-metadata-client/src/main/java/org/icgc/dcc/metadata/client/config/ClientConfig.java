@@ -15,21 +15,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.cli;
+package org.icgc.dcc.metadata.client.config;
 
-import lombok.ToString;
+import lombok.val;
 
-import com.beust.jcommander.Parameter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.web.client.RestTemplate;
 
-@ToString
-public class Options {
+@Configuration
+public class ClientConfig {
 
-  /**
-   * Info
-   */
-  @Parameter(names = { "-v", "--version" }, help = true, description = "Show version information")
-  public boolean version;
-  @Parameter(names = { "-h", "--help" }, help = true, description = "Show help information")
-  public boolean help;
+  @Bean
+  public RestTemplate restTemplate(@Value("${accessToken}") String accessToken) {
+    val details = new AuthorizationCodeResourceDetails();
+    val clientContext = new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken));
+    val restTemplate = new OAuth2RestTemplate(details, clientContext);
+
+    return restTemplate;
+  }
 
 }
