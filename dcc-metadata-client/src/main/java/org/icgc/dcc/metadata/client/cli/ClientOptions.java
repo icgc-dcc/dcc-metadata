@@ -17,9 +17,35 @@
  */
 package org.icgc.dcc.metadata.client.cli;
 
-import lombok.Data;
+import java.io.File;
 
-@Data
+import lombok.ToString;
+
+import com.beust.jcommander.Parameter;
+
+@ToString
 public class ClientOptions {
+
+  /**
+   * Input
+   */
+  @Parameter(names = { "-i", "--input-dir" }, help = true, description = "The input directory")
+  public File inputDir = new File(".");
+
+  /**
+   * Output
+   */
+  @Parameter(names = { "-o", "--output-dir" }, help = true, description = "The output directory")
+  public File outputDir = new File(".");
+  @Parameter(names = { "-m", "--manifest-filename" }, help = true, description = "The manifest file name to be created in the output directory")
+  public String fileName = "manifest.txt";
+
+  /**
+   * Info
+   */
+  @Parameter(names = { "-v", "--version" }, help = true, description = "Show version information")
+  public boolean version;
+  @Parameter(names = { "-h", "--help" }, help = true, description = "Show help information")
+  public boolean help;
 
 }

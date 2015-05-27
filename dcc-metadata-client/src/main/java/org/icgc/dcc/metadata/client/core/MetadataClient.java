@@ -17,22 +17,28 @@
  */
 package org.icgc.dcc.metadata.client.core;
 
-import java.net.URI;
+import java.io.File;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Component
 public class MetadataClient {
 
   @Autowired
   private RestTemplate restTemplate;
 
-  public void register() {
-    URI url = null;
-    Object request = null;
-    restTemplate.postForObject(url, request, Object.class);
+  @SneakyThrows
+  public void register(File inputDir, File outputDir, String fileName) {
+    log.info("Regisitering: inputDir: {}, outputDir: {}, fileName: {}",
+        inputDir.getCanonicalPath(),
+        outputDir.getCanonicalPath(),
+        fileName);
   }
 
 }

@@ -23,6 +23,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.client.cli.ClientOptions;
+import org.icgc.dcc.metadata.client.core.MetadataClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -36,11 +37,11 @@ public class ClientMain {
   /**
    * Constants.
    */
-  public static final String APPLICATION_NAME = "dcc-metadata-server";
+  public static final String APPLICATION_NAME = "dcc-metadata-client";
   public static final int SUCCESS_STATUS_CODE = 0;
   public static final int FAILURE_STATUS_CODE = 1;
 
-  public static void main(String[] args) {
+  public static void main(String... args) {
     val options = new ClientOptions();
     val cli = new JCommander(options);
     cli.setAcceptUnknownOptions(true);
@@ -63,8 +64,11 @@ public class ClientMain {
   }
 
   private static void execute(ClientOptions options, String[] args) {
-    SpringApplication.run(ClientMain.class, args);
+    val context = SpringApplication.run(ClientMain.class, args);
+    val client = context.getBean(MetadataClient.class);
     log.info("{}\n", repeat("-", 100));
+
+    client.register(options.inputDir, options.outputDir, options.fileName);
   }
 
   private static void usage(JCommander cli) {
