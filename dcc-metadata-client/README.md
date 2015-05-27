@@ -1,7 +1,7 @@
-ICGC DCC - Metadata Core
+ICGC DCC - Metadata Client
 ===
 
-Core module
+Metadata client module which communicates with the metadata server
 
 Build
 ---

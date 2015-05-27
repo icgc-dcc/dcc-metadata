@@ -15,37 +15,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.cli;
+package org.icgc.dcc.metadata.client.model;
 
-import java.io.File;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-import lombok.ToString;
+@Data
+@Accessors(chain = true)
+public class Entity {
 
-import com.beust.jcommander.Parameter;
+  private String id;
 
-@ToString
-public class ClientOptions {
+  private String gnosId;
 
-  /**
-   * Input
-   */
-  @Parameter(names = { "-i", "--input-dir" }, help = true, description = "The input directory")
-  public File inputDir = new File(".");
-
-  /**
-   * Output
-   */
-  @Parameter(names = { "-o", "--output-dir" }, help = true, description = "The output directory")
-  public File outputDir = new File(".");
-  @Parameter(names = { "-m", "--manifest-filename" }, help = true, description = "The manifest file name to be created in the output directory")
-  public String manifestFileName = "manifest.txt";
-
-  /**
-   * Info
-   */
-  @Parameter(names = { "-v", "--version" }, help = true, description = "Show version information")
-  public boolean version;
-  @Parameter(names = { "-h", "--help" }, help = true, description = "Show help information")
-  public boolean help;
+  private String fileName;
 
 }

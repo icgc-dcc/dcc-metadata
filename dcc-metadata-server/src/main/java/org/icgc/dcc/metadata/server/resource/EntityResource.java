@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.metadata.server.resource;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -30,11 +31,15 @@ import lombok.val;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.common.collect.Lists;
 
 @RestController
 @RequestMapping("/entities")
@@ -54,6 +59,23 @@ public class EntityResource {
     return ResponseEntity.ok(entity);
   }
 
+  @RequestMapping
+  public ResponseEntity<List<Entity>> find(@RequestParam("gnosId") String gnosId,
+      @RequestParam("fileName") String fileName) {
+    List<Entity> entities = Lists.newArrayList();
+    if (isNullOrEmpty(gnosId) && isNullOrEmpty(fileName)) {
+      entities = repository.findAll();
+    } else if (isNullOrEmpty(gnosId)) {
+      entities = repository.findByFileName(fileName);
+    } else if (isNullOrEmpty(fileName)) {
+      entities = repository.findByGnosId(gnosId);
+    } else {
+      entities = repository.findByGnosIdAndFileName(gnosId, fileName);
+    }
+
+    return ResponseEntity.ok(entities);
+  }
+
   @RequestMapping(value = "/{id}", method = HEAD)
   public ResponseEntity<?> exists(@PathVariable("id") String id) {
     val exists = repository.exists(id);
@@ -66,8 +88,13 @@ public class EntityResource {
   }
 
   @RequestMapping(method = POST)
-  public List<Entity> save(@RequestBody @Valid List<Entity> entities) {
-    return repository.save(entities);
+  public ResponseEntity<Entity> save(@RequestBody @Valid Entity entity) {
+    val existing = repository.findByGnosIdAndFileName(entity.getGnosId(), entity.getFileName());
+    if (!existing.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    return ResponseEntity.ok(repository.save(entity));
   }
 
 }

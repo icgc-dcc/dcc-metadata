@@ -68,7 +68,7 @@ public class ClientMain {
     val client = context.getBean(MetadataClient.class);
     log.info("{}\n", repeat("-", 100));
 
-    client.register(options.inputDir, options.outputDir, options.fileName);
+    client.register(options.inputDir, options.outputDir, options.manifestFileName);
   }
 
   private static void usage(JCommander cli) {

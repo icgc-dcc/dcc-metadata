@@ -17,42 +17,23 @@
  */
 package org.icgc.dcc.metadata.server.model;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.List;
-import java.util.Map;
-
 import lombok.Data;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Document(collection = "Entity")
 public class Entity {
 
   @Id
-  @Field("@id")
-  @JsonProperty("@id")
   private String id;
 
-  @Field("@type")
-  @JsonProperty("@type")
-  private String type;
+  @NotEmpty
+  private String gnosId;
 
-  @Field("submitter_id")
-  @JsonProperty("submitter_id")
-  private String submitterId;
-
-  private Map<String, Object> fields;
-
-  @DBRef
-  @Field("@derived_from")
-  @JsonProperty("@derived_from")
-  private List<Entity> derivedFrom = newArrayList();
+  @NotEmpty
+  private String fileName;
 
 }

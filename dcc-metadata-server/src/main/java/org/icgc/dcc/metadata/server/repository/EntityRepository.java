@@ -24,6 +24,10 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface EntityRepository extends MongoRepository<Entity, String> {
 
-  List<Entity> findByType(String type);
+  List<Entity> findByFileName(String fileName);
+
+  List<Entity> findByGnosId(String gnosId);
+
+  List<Entity> findByGnosIdAndFileName(String gnosId, String fileName);
 
 }
