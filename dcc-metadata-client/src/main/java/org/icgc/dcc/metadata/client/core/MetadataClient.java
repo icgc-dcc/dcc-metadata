@@ -17,7 +17,10 @@
  */
 package org.icgc.dcc.metadata.client.core;
 
+import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +29,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,15 +54,18 @@ public class MetadataClient {
         outputDir.getCanonicalPath(),
         manifestFileName);
 
-    val gnosId = "gnosId1";
-    val fileName = "fileName1";
+    log.info("Reading '{}' for files...", inputDir.getCanonicalPath());
+    val files = readFiles(inputDir);
+    log.info("Read {} files", formatCount(files));
 
-    val entities = getEntities(gnosId, fileName);
-    if (!entities.isEmpty()) {
-      log.info("Entity {} already registered. Returning...", entities);
-      return;
-    } else {
-      createEntity(gnosId, fileName);
+    for (val file : files) {
+      val entities = getEntities(file.getGnosId(), file.getFileName());
+      if (!entities.isEmpty()) {
+        log.info("Entity {} already registered. Returning...", entities);
+        return;
+      } else {
+        createEntity(file.getGnosId(), file.getFileName());
+      }
     }
   }
 
@@ -97,6 +104,10 @@ public class MetadataClient {
 
       throw e;
     }
+  }
+
+  private List<GNOSFile> readFiles(File gnosDir) throws IOException {
+    return new GNOSFileDirectoryReader().readFiles(gnosDir);
   }
 
 }

@@ -15,37 +15,56 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.cli;
+package org.icgc.dcc.metadata.client.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.UUID;
 
-import lombok.ToString;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.val;
 
-import com.beust.jcommander.Parameter;
+import com.google.common.collect.Lists;
 
-@ToString
-public class ClientOptions {
+public class GNOSFileDirectoryReader {
 
-  /**
-   * Input
-   */
-  @Parameter(names = { "-i", "--input-dir" }, help = true, description = "The input directory")
-  public File inputDir = new File("src/test/resources/fixtures/70b07570-0571-11e5-a6c0-1697f925ec7b");
+  public List<GNOSFile> readFiles(@NonNull File gnosDir) throws IOException {
+    val gnosId = getGNOSId(gnosDir);
 
-  /**
-   * Output
-   */
-  @Parameter(names = { "-o", "--output-dir" }, help = true, description = "The output directory")
-  public File outputDir = new File(".");
-  @Parameter(names = { "-m", "--manifest-filename" }, help = true, description = "The manifest file name to be created in the output directory")
-  public String manifestFileName = "manifest.txt";
+    val result = Lists.<GNOSFile> newArrayList();
+    try (val stream = Files.newDirectoryStream(gnosDir.toPath())) {
+      for (val entry : stream) {
+        result.add(new GNOSFile(gnosId, entry.toFile().getName()));
+      }
+    } catch (DirectoryIteratorException e) {
+      // I/O error encounted during the iteration, the cause is an IOException
+      throw e.getCause();
+    }
 
-  /**
-   * Info
-   */
-  @Parameter(names = { "-v", "--version" }, help = true, description = "Show version information")
-  public boolean version;
-  @Parameter(names = { "-h", "--help" }, help = true, description = "Show help information")
-  public boolean help;
+    return result;
+  }
+
+  private static String getGNOSId(File gnosDir) {
+    val gnosId = gnosDir.getName();
+
+    try {
+      UUID.fromString(gnosId);
+      return gnosId;
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Invalid GNOS id directory: '" + gnosId + "'. Not a valid UUID");
+    }
+  }
+
+  @Value
+  public static class GNOSFile {
+
+    String gnosId;
+    String fileName;
+
+  }
 
 }
