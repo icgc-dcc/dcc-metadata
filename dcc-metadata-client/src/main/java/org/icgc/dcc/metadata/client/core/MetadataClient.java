@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -33,10 +32,11 @@ import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.google.common.collect.ImmutableList;
 
 @Slf4j
 @Component
@@ -58,15 +58,31 @@ public class MetadataClient {
     val files = readFiles(inputDir);
     log.info("Read {} files", formatCount(files));
 
+    val entities = register(files);
+
+    val manifestWriter = new ManifestWriter(inputDir, outputDir);
+    manifestWriter.writeManifest(manifestFileName, entities);
+  }
+
+  private List<Entity> register(List<GNOSFile> files) {
+    val registeredEntities = ImmutableList.<Entity> builder();
+
     for (val file : files) {
       val entities = getEntities(file.getGnosId(), file.getFileName());
+
       if (!entities.isEmpty()) {
         log.info("Entity {} already registered. Returning...", entities);
-        return;
+
+        registeredEntities.addAll(entities);
+        continue;
       } else {
-        createEntity(file.getGnosId(), file.getFileName());
+        val entity = createEntity(file.getGnosId(), file.getFileName());
+
+        registeredEntities.add(entity);
       }
     }
+
+    return registeredEntities.build();
   }
 
   private List<Entity> getEntities(String gnosId, String fileName) {
@@ -85,7 +101,7 @@ public class MetadataClient {
     }
   }
 
-  private Optional<Entity> createEntity(String gnosId, String fileName) {
+  private Entity createEntity(String gnosId, String fileName) {
     val url = baseUrl + "/" + "entities";
     val entity = new Entity().setGnosId(gnosId).setFileName(fileName);
 
@@ -94,12 +110,8 @@ public class MetadataClient {
       val response = restTemplate.postForEntity(url, entity, Entity.class);
       log.info("Entity: {}", response);
 
-      return Optional.of(entity);
+      return entity;
     } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        return Optional.empty();
-      }
-
       log.error("Unexpected response code {} creating entity {}", e.getStatusCode(), entity);
 
       throw e;

@@ -17,16 +17,48 @@
  */
 package org.icgc.dcc.metadata.client.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
+import java.util.Properties;
 
+import lombok.Cleanup;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 
 import org.icgc.dcc.metadata.client.model.Entity;
 
+@RequiredArgsConstructor
 public class ManifestWriter {
 
-  public void writeManifest(@NonNull List<Entity> entities) {
+  @NonNull
+  private final File inputDir;
+  @NonNull
+  private final File outputDir;
 
+  @SneakyThrows
+  public void writeManifest(String manifestFileName, @NonNull List<Entity> entities) {
+    val manifest = new Properties();
+
+    for (val entity : entities) {
+      val filePath = getFilePath(entity);
+
+      manifest.put(entity.getId(), filePath);
+    }
+
+    val comments = "ICGC file manifest for " + inputDir.getName();
+
+    @Cleanup
+    val output = new FileOutputStream(new File(outputDir, manifestFileName));
+    manifest.store(output, comments);
+  }
+
+  @SneakyThrows
+  private String getFilePath(Entity entity) {
+    val file = new File(inputDir, entity.getFileName());
+    return file.getCanonicalPath();
   }
 
 }
