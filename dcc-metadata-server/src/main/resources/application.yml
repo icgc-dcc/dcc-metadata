@@ -35,4 +35,19 @@ spring:
 spring:
    profiles: development
    
+---
 
+###################################################################################################
+# Secure
+###################################################################################################
+
+# Spring
+spring:
+   profiles: secure
+   
+# OAuth authentication server
+auth:
+  server:
+    url: https://auth.icgc.org:8443/oauth/check_token
+    clientId: resource
+    clientsecret: pass

@@ -110,7 +110,7 @@ public class MetadataClient {
       val response = restTemplate.postForEntity(url, entity, Entity.class);
       log.info("Entity: {}", response);
 
-      return entity;
+      return response.getBody();
     } catch (HttpClientErrorException e) {
       log.error("Unexpected response code {} creating entity {}", e.getStatusCode(), entity);
 

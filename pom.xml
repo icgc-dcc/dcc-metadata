@@ -75,6 +75,17 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.security.oauth</groupId>
+        <artifactId>spring-security-oauth2</artifactId>
+        <version>${spring-security-oauth2.version}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <groupId>org.codehaus.jackson</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
 
       <!-- Database -->
       <dependency>
@@ -110,10 +121,11 @@
 
   <properties>
     <!-- Versions - DCC -->
-    <dcc-common.version>3.8.6.5</dcc-common.version>
+    <dcc-common.version>3.8.8.3</dcc-common.version>
 
     <!-- Versions - Spring -->
     <spring-boot.version>1.2.3.RELEASE</spring-boot.version>
+    <spring-security-oauth2.version>2.0.7.RELEASE</spring-security-oauth2.version>
 
     <!-- Versions - DB -->
     <jdbi.version>2.53</jdbi.version>

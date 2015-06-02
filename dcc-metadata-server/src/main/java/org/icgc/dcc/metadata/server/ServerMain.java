@@ -25,13 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.server.cli.ServerOptions;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
 @Slf4j
-@SpringBootApplication
+@Configuration
+@ComponentScan
 public class ServerMain {
 
   /**
