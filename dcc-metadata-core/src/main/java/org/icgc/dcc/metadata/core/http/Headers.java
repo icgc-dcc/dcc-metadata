@@ -15,19 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.repository;
+package org.icgc.dcc.metadata.core.http;
 
-import java.util.List;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+@NoArgsConstructor(access = PRIVATE)
+public final class Headers {
 
-public interface EntityRepository extends MongoRepository<Entity, String> {
-
-  List<Entity> findByFileName(String fileName);
-
-  List<Entity> findByGnosId(String gnosId);
-
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
+  /**
+   * Id of the conflicting entity.
+   */
+  public static final String ENTITY_ID_HEADER = "Entity-Id";
 
 }
