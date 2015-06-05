@@ -24,13 +24,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.val;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.ManagementSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,9 +36,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
-import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -85,24 +78,6 @@ public class SecurityConfig {
 
       http.csrf().disable();
       configureAuthorization(http);
-    }
-
-    @Bean
-    public AccessTokenConverter accessTokenConverter() {
-      return new DefaultAccessTokenConverter();
-    }
-
-    @Bean
-    public RemoteTokenServices remoteTokenServices(final @Value("${auth.server.url}") String checkTokenUrl,
-        final @Value("${auth.server.clientId}") String clientId,
-        final @Value("${auth.server.clientsecret}") String clientSecret) {
-      val remoteTokenServices = new RemoteTokenServices();
-      remoteTokenServices.setCheckTokenEndpointUrl(checkTokenUrl);
-      remoteTokenServices.setClientId(clientId);
-      remoteTokenServices.setClientSecret(clientSecret);
-      remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
-
-      return remoteTokenServices;
     }
 
     private static void configureAuthorization(HttpSecurity http) throws Exception {
