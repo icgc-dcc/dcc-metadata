@@ -17,100 +17,50 @@
  */
 package org.icgc.dcc.metadata.server.config;
 
-import static java.lang.Boolean.TRUE;
-import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
-
-import java.net.ConnectException;
-
+import static org.icgc.dcc.metadata.core.retry.RetryUtils.getRetryableExceptions;
+import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.metadata.core.retry.DefaultRetryListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
+import org.springframework.context.annotation.Profile;
+import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-
-@Slf4j
 @Configuration
+@Profile("secure")
 public class RetryConfig {
 
   private static final long INITIAL_BACKOFF_INTERVAL = 15000L; // 15 seconds
 
-  @Value("${connection.maxRetries:3}")
+  @Value("${auth.connection.maxRetries:5}")
   private int maxRetries;
+  @Value("${auth.connection.initialBackoff:" + INITIAL_BACKOFF_INTERVAL + "}")
+  private long initialBackoff;
+  @Value("${auth.connection.multiplier:" + DEFAULT_MULTIPLIER + "}")
+  private double multiplier;
 
   @Bean
   public RetryTemplate retryTemplate() {
     val result = new RetryTemplate();
+    result.setBackOffPolicy(defineBackOffPolicy());
 
-    // Define what exceptions should be retried
-    Builder<Class<? extends Throwable>, Boolean> exceptions = ImmutableMap.builder();
-
-    // Timeout exception
-    exceptions.put(ResourceAccessException.class, TRUE);
-
-    // 503 Service Unavailable
-    exceptions.put(HttpServerErrorException.class, TRUE);
-    result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, exceptions.build(), true));
-
-    val backOffPolicy = new ExponentialBackOffPolicy();
-    backOffPolicy.setInitialInterval(INITIAL_BACKOFF_INTERVAL);
-    result.setBackOffPolicy(backOffPolicy);
-
-    result.registerListener(new CustomRetryListener());
+    result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, getRetryableExceptions(), true));
+    result.registerListener(new DefaultRetryListener());
 
     return result;
   }
 
-  public static class CustomRetryListener extends RetryListenerSupport {
+  private BackOffPolicy defineBackOffPolicy() {
+    val backOffPolicy = new ExponentialBackOffPolicy();
+    backOffPolicy.setInitialInterval(initialBackoff);
+    backOffPolicy.setMultiplier(multiplier);
 
-    @Override
-    public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-      if (!(isConnectionTimeout(throwable) || isServiceUnavailable(throwable))) {
-        log.debug("Received a ResourceAccessException, but it's not the connection timeout or 503 Service Unavailabe. "
-            + "Do not retry.");
-        context.setExhaustedOnly();
-      }
-    }
-
-    private static boolean isConnectionTimeout(Throwable throwable) {
-      if (!(throwable instanceof ResourceAccessException)) {
-        return false;
-      }
-
-      val cause = throwable.getCause();
-      if (cause instanceof ConnectException && cause.getMessage().equals("Operation timed out")) {
-        log.debug("Operation timed out. Retrying...");
-        return true;
-      }
-
-      return false;
-    }
-
-    private static boolean isServiceUnavailable(Throwable throwable) {
-      if (!(throwable instanceof HttpServerErrorException)) {
-        return false;
-      }
-
-      val e = (HttpServerErrorException) throwable;
-      if (e.getStatusCode() == SERVICE_UNAVAILABLE) {
-        log.warn("Service unavailable. Retrying...");
-        return true;
-      }
-
-      return false;
-    }
-
+    return backOffPolicy;
   }
 
 }

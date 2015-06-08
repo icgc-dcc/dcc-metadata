@@ -17,11 +17,7 @@
  */
 package org.icgc.dcc.metadata.client.core;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
-import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
-import static org.springframework.http.HttpStatus.CONFLICT;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
 import org.icgc.dcc.metadata.client.model.Entity;
+import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.ImmutableList;
 
@@ -46,10 +39,8 @@ import com.google.common.collect.ImmutableList;
 @Component
 public class MetadataClient {
 
-  @Value("${server.baseUrl}")
-  private String baseUrl;
   @Autowired
-  private RestTemplate restTemplate;
+  private EntityRegistrationService registrationServive;
 
   @SneakyThrows
   public void register(File inputDir, File outputDir, String manifestFileName) {
@@ -72,45 +63,11 @@ public class MetadataClient {
     val registeredEntities = ImmutableList.<Entity> builder();
 
     for (val file : files) {
-      val entity = createEntity(file.getGnosId(), file.getFileName());
+      val entity = registrationServive.register(file.getGnosId(), file.getFileName());
       registeredEntities.add(entity);
     }
 
     return registeredEntities.build();
-  }
-
-  private Entity createEntity(String gnosId, String fileName) {
-    val url = baseUrl + "/" + "entities";
-    val entity = new Entity().setGnosId(gnosId).setFileName(fileName);
-
-    try {
-      log.info("Posting: {}", entity);
-      val response = restTemplate.postForEntity(url, entity, Entity.class);
-      log.info("Entity: {}", response);
-
-      return response.getBody();
-    } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() == CONFLICT) {
-        val entityId = parseEntityId(e.getResponseHeaders());
-        checkState(!isNullOrEmpty(entityId), "The server reported that %s already exists, but did not provide its ID",
-            entity);
-        entity.setId(entityId);
-        log.info("The entity is aready registered. Reusing ID '{}'", entity.getId());
-
-        return entity;
-      }
-
-      log.error("Unexpected response code {} creating entity {}", e.getStatusCode(), entity);
-
-      throw e;
-    }
-  }
-
-  private static String parseEntityId(HttpHeaders responseHeaders) {
-    val values = responseHeaders.get(ENTITY_ID_HEADER);
-    checkState(!values.isEmpty() && values.size() == 1, "Malformed response. %s", values);
-
-    return values.get(0);
   }
 
   private List<GNOSFile> readFiles(File gnosDir) throws IOException {

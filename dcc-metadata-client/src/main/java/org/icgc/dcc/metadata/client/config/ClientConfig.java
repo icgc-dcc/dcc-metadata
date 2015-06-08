@@ -17,19 +17,37 @@
  */
 package org.icgc.dcc.metadata.client.config;
 
+import static java.lang.Boolean.FALSE;
+import static org.icgc.dcc.metadata.core.retry.RetryUtils.getRetryableExceptions;
+import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
 import lombok.val;
 
+import org.icgc.dcc.metadata.core.retry.DefaultRetryListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ClientConfig {
+
+  private static final long INITIAL_BACKOFF_INTERVAL = 15000L; // 15 seconds
+
+  @Value("${server.connection.maxRetries:5}")
+  private int maxRetries;
+  @Value("${server.connection.initialBackoff:" + INITIAL_BACKOFF_INTERVAL + "}")
+  private long initialBackoff;
+  @Value("${server.connection.multiplier:" + DEFAULT_MULTIPLIER + "}")
+  private double multiplier;
 
   @Bean
   public RestTemplate restTemplate(@Value("${accessToken}") String accessToken) {
@@ -38,6 +56,28 @@ public class ClientConfig {
     val restTemplate = new OAuth2RestTemplate(details, clientContext);
 
     return restTemplate;
+  }
+
+  @Bean
+  public RetryTemplate retryTemplate() {
+    val result = new RetryTemplate();
+    result.setBackOffPolicy(defineBackOffPolicy());
+
+    val retryableExceptions = getRetryableExceptions();
+    retryableExceptions.put(HttpClientErrorException.class, FALSE);
+
+    result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, retryableExceptions, true));
+    result.registerListener(new DefaultRetryListener());
+
+    return result;
+  }
+
+  private BackOffPolicy defineBackOffPolicy() {
+    val backOffPolicy = new ExponentialBackOffPolicy();
+    backOffPolicy.setInitialInterval(initialBackoff);
+    backOffPolicy.setMultiplier(multiplier);
+
+    return backOffPolicy;
   }
 
 }
