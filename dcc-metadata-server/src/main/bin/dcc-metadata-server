@@ -19,7 +19,7 @@
 # Optimized for use with version 3.5.19 of the Wrapper.
 
 # Application
-APP_NAME="dcc-meta-server"
+APP_NAME="dcc-metadata-server"
 APP_LONG_NAME="DCC Metadata Server"
 
 # Wrapper
