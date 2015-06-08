@@ -17,7 +17,8 @@
  */
 package org.icgc.dcc.metadata.server.config;
 
-import static org.icgc.dcc.metadata.core.retry.RetryUtils.getRetryableExceptions;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.icgc.dcc.metadata.core.retry.RetryPolicies.getRetryableExceptions;
 import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
 import lombok.val;
 
@@ -35,14 +36,15 @@ import org.springframework.retry.support.RetryTemplate;
 @Profile("secure")
 public class RetryConfig {
 
-  private static final long INITIAL_BACKOFF_INTERVAL = 15000L; // 15 seconds
+  private static final int DEFAULT_MAX_RETRIES = 5;
+  private static final long DEFAULT_INITIAL_BACKOFF_INTERVAL = SECONDS.toMillis(15L);
 
-  @Value("${auth.connection.maxRetries:5}")
-  private int maxRetries;
-  @Value("${auth.connection.initialBackoff:" + INITIAL_BACKOFF_INTERVAL + "}")
-  private long initialBackoff;
-  @Value("${auth.connection.multiplier:" + DEFAULT_MULTIPLIER + "}")
-  private double multiplier;
+  @Value("${auth.connection.maxRetries}")
+  private int maxRetries = DEFAULT_MAX_RETRIES;
+  @Value("${auth.connection.initialBackoff}")
+  private long initialBackoff = DEFAULT_INITIAL_BACKOFF_INTERVAL;
+  @Value("${auth.connection.multiplier}")
+  private double multiplier = DEFAULT_MULTIPLIER;
 
   @Bean
   public RetryTemplate retryTemplate() {

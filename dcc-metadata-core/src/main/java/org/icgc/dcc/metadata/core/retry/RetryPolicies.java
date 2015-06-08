@@ -18,19 +18,18 @@
 package org.icgc.dcc.metadata.core.retry;
 
 import static java.lang.Boolean.TRUE;
-import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Map;
 
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
-@NoArgsConstructor(access = PRIVATE)
-public final class RetryUtils {
+@UtilityClass
+public class RetryPolicies {
 
   /**
    * Returns a map with exceptions that should be retried by the Spring Retry Framework.
@@ -40,12 +39,10 @@ public final class RetryUtils {
    * <li><b>HttpServerErrorException</b> - to retry 503 Service Unavailable</li>
    * </ul>
    */
-  public static Map<Class<? extends Throwable>, Boolean> getRetryableExceptions() {
-    Map<Class<? extends Throwable>, Boolean> exceptions = Maps.newHashMap();
-    exceptions.put(ResourceAccessException.class, TRUE);
-    exceptions.put(HttpServerErrorException.class, TRUE);
-
-    return exceptions;
+  public Map<Class<? extends Throwable>, Boolean> getRetryableExceptions() {
+    return ImmutableMap.of(
+        ResourceAccessException.class, TRUE,
+        HttpServerErrorException.class, TRUE);
   }
 
 }

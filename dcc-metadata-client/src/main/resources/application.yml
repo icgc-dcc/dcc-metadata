@@ -9,7 +9,7 @@
 
 accessToken: xxx-token-xxx
 server:
-  baseUrl: http://localhost:8080
+  baseUrl: https://localhost:8080
    
   # Connection retries in case of connection failure 
   connection:

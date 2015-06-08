@@ -15,63 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.core;
+package org.icgc.dcc.metadata.server.oauth;
 
-import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
-import org.icgc.dcc.metadata.client.model.Entity;
-import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 
-import com.google.common.collect.ImmutableList;
-
-@Slf4j
-@Component
-public class MetadataClient {
+public class RetryTokenServices extends RemoteTokenServices {
 
   @Autowired
-  private EntityRegistrationService registrationService;
+  private RetryTemplate retryTemplate;
 
-  @SneakyThrows
-  public void register(File inputDir, File outputDir, String manifestFileName) {
-    log.info("Regisitering: inputDir: {}, outputDir: {}, manifestFileName: {}",
-        inputDir.getCanonicalPath(),
-        outputDir.getCanonicalPath(),
-        manifestFileName);
-
-    log.info("Reading '{}' for files...", inputDir.getCanonicalPath());
-    val files = readFiles(inputDir);
-    log.info("Read {} files", formatCount(files));
-
-    val entities = register(files);
-
-    val manifestWriter = new ManifestWriter(inputDir, outputDir);
-    manifestWriter.writeManifest(manifestFileName, entities);
-  }
-
-  private List<Entity> register(List<GNOSFile> files) {
-    val registeredEntities = ImmutableList.<Entity> builder();
-
-    for (val file : files) {
-      val entity = registrationService.register(file.getGnosId(), file.getFileName());
-      registeredEntities.add(entity);
-    }
-
-    return registeredEntities.build();
-  }
-
-  private List<GNOSFile> readFiles(File gnosDir) throws IOException {
-    return new GNOSFileDirectoryReader().readFiles(gnosDir);
+  @Override
+  public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException,
+      InvalidTokenException {
+    return retryTemplate.execute(context -> RetryTokenServices.super.loadAuthentication(accessToken));
   }
 
 }

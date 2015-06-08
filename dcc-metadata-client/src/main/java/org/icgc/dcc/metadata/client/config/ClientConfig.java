@@ -18,7 +18,8 @@
 package org.icgc.dcc.metadata.client.config;
 
 import static java.lang.Boolean.FALSE;
-import static org.icgc.dcc.metadata.core.retry.RetryUtils.getRetryableExceptions;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.icgc.dcc.metadata.core.retry.RetryPolicies.getRetryableExceptions;
 import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
 import lombok.val;
 
@@ -37,17 +38,20 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.common.collect.Maps;
+
 @Configuration
 public class ClientConfig {
 
-  private static final long INITIAL_BACKOFF_INTERVAL = 15000L; // 15 seconds
+  private static final int DEFAULT_MAX_RETRIES = 5;
+  private static final long DEFAULT_INITIAL_BACKOFF_INTERVAL = SECONDS.toMillis(15L);
 
-  @Value("${server.connection.maxRetries:5}")
-  private int maxRetries;
-  @Value("${server.connection.initialBackoff:" + INITIAL_BACKOFF_INTERVAL + "}")
-  private long initialBackoff;
-  @Value("${server.connection.multiplier:" + DEFAULT_MULTIPLIER + "}")
-  private double multiplier;
+  @Value("${server.connection.maxRetries}")
+  private int maxRetries = DEFAULT_MAX_RETRIES;
+  @Value("${server.connection.initialBackoff}")
+  private long initialBackoff = DEFAULT_INITIAL_BACKOFF_INTERVAL;
+  @Value("${server.connection.multiplier}")
+  private double multiplier = DEFAULT_MULTIPLIER;
 
   @Bean
   public RestTemplate restTemplate(@Value("${accessToken}") String accessToken) {
@@ -61,9 +65,9 @@ public class ClientConfig {
   @Bean
   public RetryTemplate retryTemplate() {
     val result = new RetryTemplate();
-    result.setBackOffPolicy(defineBackOffPolicy());
+    result.setBackOffPolicy(createBackOffPolicy());
 
-    val retryableExceptions = getRetryableExceptions();
+    val retryableExceptions = Maps.newHashMap(getRetryableExceptions());
     retryableExceptions.put(HttpClientErrorException.class, FALSE);
 
     result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, retryableExceptions, true));
@@ -72,7 +76,7 @@ public class ClientConfig {
     return result;
   }
 
-  private BackOffPolicy defineBackOffPolicy() {
+  private BackOffPolicy createBackOffPolicy() {
     val backOffPolicy = new ExponentialBackOffPolicy();
     backOffPolicy.setInitialInterval(initialBackoff);
     backOffPolicy.setMultiplier(multiplier);

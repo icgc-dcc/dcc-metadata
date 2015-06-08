@@ -95,19 +95,19 @@ PLIST_DOMAIN=org.tanukisoftware.wrapper
 # The following two lines are used by the chkconfig command. Change as is
 #  appropriate for your application.  They should remain commented.
 # chkconfig: 2345 20 80
-# description: DCC Repository Server
+# description: DCC Metadata Server
  
 # Initialization block for the install_initd and remove_initd scripts used by
 #  SUSE linux distributions.
 ### BEGIN INIT INFO
-# Provides: dcc-repository-server
+# Provides: dcc-metadata-server
 # Required-Start: $local_fs $network $syslog
 # Should-Start: 
 # Required-Stop:
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
-# Short-Description: DCC Repository Server
-# Description: DCC Repository Server
+# Short-Description: DCC Metadata Server
+# Description: DCC Metadata Server
 ### END INIT INFO
 
 # Do not modify anything beyond this point

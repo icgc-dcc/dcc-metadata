@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +30,6 @@ import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -47,7 +46,7 @@ public class EntityRegistrationService {
   @Autowired
   private RetryTemplate retryTemplate;
 
-  public Entity register(String gnosId, String fileName) {
+  public Entity register(@NonNull String gnosId, @NonNull String fileName) {
     val entity = new Entity().setGnosId(gnosId).setFileName(fileName);
 
     try {
@@ -70,16 +69,8 @@ public class EntityRegistrationService {
   @SneakyThrows
   private Entity register(Entity entity) {
     val url = baseUrl + "/" + "entities";
-    val result = retryTemplate.execute(new RetryCallback<Entity, Exception>() {
 
-      @Override
-      public Entity doWithRetry(RetryContext context) throws Exception {
-        return restTemplate.postForEntity(url, entity, Entity.class).getBody();
-      }
-
-    });
-
-    return result;
+    return retryTemplate.execute(context -> restTemplate.postForEntity(url, entity, Entity.class).getBody());
   }
 
   private static Entity resolveEntityId(Entity entity, HttpHeaders responseHeaders) {
@@ -94,7 +85,7 @@ public class EntityRegistrationService {
 
   private static String parseEntityId(HttpHeaders responseHeaders) {
     val values = responseHeaders.get(ENTITY_ID_HEADER);
-    checkState(!values.isEmpty() && values.size() == 1, "Malformed response. %s", values);
+    checkState(values.size() == 1, "Malformed response. %s", values);
 
     return values.get(0);
   }

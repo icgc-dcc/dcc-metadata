@@ -19,17 +19,11 @@ package org.icgc.dcc.metadata.server.config;
 
 import lombok.val;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.icgc.dcc.metadata.server.oauth.RetryTokenServices;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.support.RetryTemplate;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
@@ -54,32 +48,6 @@ public class TokenServiceConfig {
   @Bean
   public AccessTokenConverter accessTokenConverter() {
     return new DefaultAccessTokenConverter();
-  }
-
-  public static class RetryTokenServices extends RemoteTokenServices {
-
-    @Autowired
-    private RetryTemplate retryTemplate;
-
-    @Override
-    public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException,
-        InvalidTokenException {
-
-      return retryTemplate.execute(new RetryCallback<OAuth2Authentication, AuthenticationException>() {
-
-        @Override
-        public OAuth2Authentication doWithRetry(RetryContext context) throws AuthenticationException {
-          return delegatedLoadAuthentication(accessToken);
-        }
-
-      });
-
-    }
-
-    private OAuth2Authentication delegatedLoadAuthentication(String accessToken) {
-      return super.loadAuthentication(accessToken);
-    }
-
   }
 
 }
