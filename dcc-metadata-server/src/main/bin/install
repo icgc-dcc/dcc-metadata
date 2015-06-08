@@ -105,5 +105,5 @@ ln -s "$jar" "$libdir/$name.jar"
 
 # Restart application
 log 'Restarting application...'
-$bindir/dcc-repository-server restart > /dev/null
+$bindir/dcc-metadata-server restart > /dev/null
 log 'Finished'
