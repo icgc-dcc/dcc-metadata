@@ -10,16 +10,16 @@
       <directory>src/main/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
-        <include>annotator.sh</include>
+        <include>${artifactId}</include>
+        <include>install</include>
+        <include>wrapper-linux-x86-64</include>
+        <include>wrapper-macosx-universal-64</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
-      <directory>src/main/resources</directory>
+      <directory>src/main/conf</directory>
       <outputDirectory>conf</outputDirectory>
-      <includes>
-        <include>application.yml</include>
-      </includes>
     </fileSet>
     <fileSet>
       <directory>src/main/lib</directory>

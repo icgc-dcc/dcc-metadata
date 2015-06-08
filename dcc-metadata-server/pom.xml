@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.icgc.dcc</groupId>
     <artifactId>dcc-metadata</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -86,12 +86,30 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-dist</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>${package.attach}</attach>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
   <properties>
     <!-- Spring -->
-    <main.class>org.icgc.dcc.metadata.ServerMain</main.class>
+    <main.class>org.icgc.dcc.metadata.server.ServerMain</main.class>
     <start-class>${main.class}</start-class>
   </properties>
 
