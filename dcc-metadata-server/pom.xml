@@ -78,6 +78,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -111,6 +112,7 @@
     <!-- Spring -->
     <main.class>org.icgc.dcc.metadata.server.ServerMain</main.class>
     <start-class>${main.class}</start-class>
+    <spring-maven-plugin.version>1.2.4.RELEASE</spring-maven-plugin.version>
   </properties>
 
 </project>
