@@ -15,9 +15,8 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.config;
+package org.icgc.dcc.metadata.server.config;
 
-import static java.lang.Boolean.FALSE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.icgc.dcc.metadata.core.retry.RetryPolicies.getRetryableExceptions;
 import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
@@ -27,56 +26,38 @@ import org.icgc.dcc.metadata.core.retry.DefaultRetryListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-
-import com.google.common.collect.Maps;
 
 @Configuration
-public class ClientConfig {
+@Profile("secure")
+public class RetryConfig {
 
   private static final int DEFAULT_MAX_RETRIES = 5;
   private static final long DEFAULT_INITIAL_BACKOFF_INTERVAL = SECONDS.toMillis(15L);
 
-  @Value("${server.connection.maxRetries}")
+  @Value("${auth.connection.maxRetries}")
   private int maxRetries = DEFAULT_MAX_RETRIES;
-  @Value("${server.connection.initialBackoff}")
+  @Value("${auth.connection.initialBackoff}")
   private long initialBackoff = DEFAULT_INITIAL_BACKOFF_INTERVAL;
-  @Value("${server.connection.multiplier}")
+  @Value("${auth.connection.multiplier}")
   private double multiplier = DEFAULT_MULTIPLIER;
-
-  @Bean
-  public RestTemplate restTemplate(@Value("${accessToken}") String accessToken) {
-    val details = new AuthorizationCodeResourceDetails();
-    val clientContext = new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken));
-    val restTemplate = new OAuth2RestTemplate(details, clientContext);
-
-    return restTemplate;
-  }
 
   @Bean
   public RetryTemplate retryTemplate() {
     val result = new RetryTemplate();
-    result.setBackOffPolicy(createBackOffPolicy());
+    result.setBackOffPolicy(defineBackOffPolicy());
 
-    val retryableExceptions = Maps.newHashMap(getRetryableExceptions());
-    retryableExceptions.put(HttpClientErrorException.class, FALSE);
-
-    result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, retryableExceptions, true));
+    result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, getRetryableExceptions(), true));
     result.registerListener(new DefaultRetryListener());
 
     return result;
   }
 
-  private BackOffPolicy createBackOffPolicy() {
+  private BackOffPolicy defineBackOffPolicy() {
     val backOffPolicy = new ExponentialBackOffPolicy();
     backOffPolicy.setInitialInterval(initialBackoff);
     backOffPolicy.setMultiplier(multiplier);

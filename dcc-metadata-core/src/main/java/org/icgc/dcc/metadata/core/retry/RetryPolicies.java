@@ -15,19 +15,34 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.repository;
+package org.icgc.dcc.metadata.core.retry;
 
-import java.util.List;
+import static java.lang.Boolean.TRUE;
 
-import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Map;
 
-public interface EntityRepository extends MongoRepository<Entity, String> {
+import lombok.experimental.UtilityClass;
 
-  List<Entity> findByFileName(String fileName);
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
-  List<Entity> findByGnosId(String gnosId);
+import com.google.common.collect.ImmutableMap;
 
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
+@UtilityClass
+public class RetryPolicies {
+
+  /**
+   * Returns a map with exceptions that should be retried by the Spring Retry Framework.
+   * 
+   * <ul>
+   * <li><b>ResourceAccessException</b> - to retry Connection Timeout</li>
+   * <li><b>HttpServerErrorException</b> - to retry 503 Service Unavailable</li>
+   * </ul>
+   */
+  public Map<Class<? extends Throwable>, Boolean> getRetryableExceptions() {
+    return ImmutableMap.of(
+        ResourceAccessException.class, TRUE,
+        HttpServerErrorException.class, TRUE);
+  }
 
 }

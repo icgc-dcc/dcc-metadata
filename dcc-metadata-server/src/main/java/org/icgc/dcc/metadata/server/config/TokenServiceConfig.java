@@ -15,19 +15,39 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.repository;
+package org.icgc.dcc.metadata.server.config;
 
-import java.util.List;
+import lombok.val;
 
-import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.icgc.dcc.metadata.server.oauth.RetryTokenServices;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 
-public interface EntityRepository extends MongoRepository<Entity, String> {
+@Configuration
+@Profile("secure")
+public class TokenServiceConfig {
 
-  List<Entity> findByFileName(String fileName);
+  @Bean
+  public RemoteTokenServices remoteTokenServices(final @Value("${auth.server.url}") String checkTokenUrl,
+      final @Value("${auth.server.clientId}") String clientId,
+      final @Value("${auth.server.clientsecret}") String clientSecret) {
+    val remoteTokenServices = new RetryTokenServices();
+    remoteTokenServices.setCheckTokenEndpointUrl(checkTokenUrl);
+    remoteTokenServices.setClientId(clientId);
+    remoteTokenServices.setClientSecret(clientSecret);
+    remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
 
-  List<Entity> findByGnosId(String gnosId);
+    return remoteTokenServices;
+  }
 
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
+  @Bean
+  public AccessTokenConverter accessTokenConverter() {
+    return new DefaultAccessTokenConverter();
+  }
 
 }

@@ -15,19 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.repository;
+package org.icgc.dcc.metadata.client.config;
 
-import java.util.List;
+import javax.annotation.PostConstruct;
 
-import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.icgc.dcc.common.core.security.SSLCertificateValidation;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-public interface EntityRepository extends MongoRepository<Entity, String> {
+/**
+ * Disables verification of SSL self-signed certificates.
+ */
+@Profile("development")
+@Configuration
+public class SSLConfig {
 
-  List<Entity> findByFileName(String fileName);
-
-  List<Entity> findByGnosId(String gnosId);
-
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
+  @PostConstruct
+  public void init() {
+    SSLCertificateValidation.disable();
+  }
 
 }

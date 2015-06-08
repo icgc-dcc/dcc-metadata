@@ -1,4 +1,4 @@
-ICGC DCC - Metatdata
+ICGC DCC - Metadata
 ===
 
 Metadata system for ICGC projects

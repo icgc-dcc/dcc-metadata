@@ -18,6 +18,8 @@
 package org.icgc.dcc.metadata.server.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonList;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -28,11 +30,13 @@ import javax.validation.Valid;
 
 import lombok.val;
 
+import org.icgc.dcc.metadata.core.http.Headers;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,7 +74,7 @@ public class EntityResource {
     } else if (isNullOrEmpty(fileName)) {
       entities = repository.findByGnosId(gnosId);
     } else {
-      entities = repository.findByGnosIdAndFileName(gnosId, fileName);
+      entities = singletonList(repository.findByGnosIdAndFileName(gnosId, fileName));
     }
 
     return ResponseEntity.ok(entities);
@@ -90,11 +94,18 @@ public class EntityResource {
   @RequestMapping(method = POST)
   public ResponseEntity<Entity> save(@RequestBody @Valid Entity entity) {
     val existing = repository.findByGnosIdAndFileName(entity.getGnosId(), entity.getFileName());
-    if (!existing.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    if (existing != null) {
+      return new ResponseEntity<>(createConflictHeaders(existing), CONFLICT);
     }
 
     return ResponseEntity.ok(repository.save(entity));
+  }
+
+  private static MultiValueMap<String, String> createConflictHeaders(Entity entity) {
+    val result = new LinkedMultiValueMap<String, String>();
+    result.add(Headers.ENTITY_ID_HEADER, entity.getId());
+
+    return result;
   }
 
 }
