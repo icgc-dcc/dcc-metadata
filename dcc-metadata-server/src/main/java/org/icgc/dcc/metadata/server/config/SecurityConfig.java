@@ -17,6 +17,10 @@
  */
 package org.icgc.dcc.metadata.server.config;
 
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -56,6 +60,7 @@ public class SecurityConfig {
   @EnableAutoConfiguration
   protected static class EnabledSecurityConfig extends ResourceServerConfigurerAdapter {
 
+    private static final String ACCESS_CONFIG = "#oauth2.hasScope('metadata')";
     private TokenExtractor tokenExtractor = new BearerTokenExtractor();
 
     @Override
@@ -84,13 +89,17 @@ public class SecurityConfig {
       // @formatter:off
       http
         .authorizeRequests()
-        .antMatchers("/entities/**")
-        .access("#oauth2.hasScope('metadata')")
+        .antMatchers(POST,"/entities/**")
+        .access(ACCESS_CONFIG)
+        .antMatchers(PUT,"/entities/**")
+        .access(ACCESS_CONFIG)
+        .antMatchers(DELETE,"/entities/**")
+        .access(ACCESS_CONFIG)
         .and()
         
         .authorizeRequests()
         .anyRequest()
-        .authenticated();
+        .permitAll();
       // @formatter:on
     }
   }
