@@ -18,6 +18,7 @@
 package org.icgc.dcc.metadata.server.config;
 
 import org.icgc.dcc.metadata.server.ServerMain;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
@@ -26,6 +27,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 /**
  * Repository configuration.
@@ -36,15 +38,20 @@ import com.mongodb.MongoClient;
 @EnableMongoRepositories(basePackageClasses = ServerMain.class)
 public class RepositoryConfig extends AbstractMongoConfiguration {
 
+  @Value("${mongo.database}")
+  private String dbName;
+  @Value("${mongo.url}")
+  private String url;
+
   @Override
   protected String getDatabaseName() {
-    return "dcc-metadata";
+    return dbName;
   }
 
   @Bean
   @Override
   public Mongo mongo() throws Exception {
-    return new MongoClient("localhost", 27017);
+    return new MongoClient(new MongoClientURI(url));
   }
 
   @Override

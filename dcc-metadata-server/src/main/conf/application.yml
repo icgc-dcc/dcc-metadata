@@ -23,13 +23,13 @@ management:
   address: 127.0.0.1
   port: 8444
 
-# Postgres
-postgres:
-  user: dcc
-  password: <fill in>
-  database: fathmm
-  server: hcn-117.res.oicr.on.ca
-  url: jdbc:postgresql://${postgres.server}/${postgres.database}?user=${postgres.user}&password=${postgres.password}
+# Mongo
+mongo:
+  user: test
+  password: pass
+  database: meta
+  server: localhost
+  url: mongodb://${mongo.user}:${mongo.password}@${mongo.server}
 
 ---
 
@@ -66,8 +66,8 @@ spring:
 auth:
   server:
     url: https://auth.icgc.org/oauth/check_token
-    clientId: resource
-    clientsecret: pass
+    clientId: <id>
+    clientsecret: <pass>
     
   # Connection retries in case of connection failure 
   connection:
