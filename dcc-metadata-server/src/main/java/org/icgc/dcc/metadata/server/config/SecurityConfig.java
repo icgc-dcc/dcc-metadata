@@ -60,7 +60,7 @@ public class SecurityConfig {
   @EnableAutoConfiguration
   protected static class EnabledSecurityConfig extends ResourceServerConfigurerAdapter {
 
-    private static final String ACCESS_CONFIG = "#oauth2.hasScope('metadata')";
+    private static final String ACCESS_CONFIG = "#oauth2.hasScope('os.upload') or #oauth2.hasScope('s3.upload')";
     private TokenExtractor tokenExtractor = new BearerTokenExtractor();
 
     @Override

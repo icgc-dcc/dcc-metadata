@@ -17,11 +17,15 @@
  */
 package org.icgc.dcc.metadata.core.retry;
 
+import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 import java.net.ConnectException;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.val;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.retry.RetryCallback;
@@ -32,13 +36,25 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class DefaultRetryListener extends RetryListenerSupport {
+
+  ClientRetryListener clientRetryListener;
 
   @Override
   public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-    if (isClientException(throwable)) {
-      log.debug("HttpClientErrorException detected. Do nothing. The downstream will do the further processing.");
+    if (clientRetryListener != null) {
+      clientRetryListener.onError(context, callback, throwable);
+      if (!clientRetryListener.isRetry()) {
+        log.debug("The ClientRetryListener requested to disable retries. Skipping the default retry processing...");
+        return;
+      }
+    }
 
+    if (isClientException(throwable)) {
+      log.debug("HTTP client related exception detected. Do nothing. The downstream will do the further processing.");
       return;
     }
 

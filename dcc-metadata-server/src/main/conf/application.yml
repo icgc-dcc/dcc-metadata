@@ -1,4 +1,3 @@
----
 #
 # DCC Metadata Server - Configuration
 #
@@ -7,20 +6,30 @@
 # Common
 ###################################################################################################
 
+spring:
+  profiles.active: production
+
 # Server
 server:
+  port: 8443
   ssl:
     key-store: src/main/conf/keystore.p12
     key-store-type: PKCS12
     key-store-password: P@ssw0rd
 
+# Management endpoints
+management:
+  context_path: /admin
+  address: 127.0.0.1
+  port: 8444
+
 # Postgres
 postgres:
-   user: dcc
-   password: <fill in>
-   database: fathmm
-   server: hcn-117.res.oicr.on.ca
-   url: jdbc:postgresql://${postgres.server}/${postgres.database}?user=${postgres.user}&password=${postgres.password}
+  user: dcc
+  password: <fill in>
+  database: fathmm
+  server: hcn-117.res.oicr.on.ca
+  url: jdbc:postgresql://${postgres.server}/${postgres.database}?user=${postgres.user}&password=${postgres.password}
 
 ---
 
@@ -30,7 +39,8 @@ postgres:
 
 # Spring
 spring:
-   profiles: production
+  profiles: production
+  profiles.include: secure,development
 
 ---
 
@@ -40,7 +50,7 @@ spring:
 
 # Spring
 spring:
-   profiles: development
+  profiles: development
    
 ---
 
@@ -50,12 +60,12 @@ spring:
 
 # Spring
 spring:
-   profiles: secure
+  profiles: secure
    
 # OAuth authentication server
 auth:
   server:
-    url: https://auth.icgc.org:8443/oauth/check_token
+    url: https://auth.icgc.org/oauth/check_token
     clientId: resource
     clientsecret: pass
     
