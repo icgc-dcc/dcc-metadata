@@ -18,7 +18,7 @@
 package org.icgc.dcc.metadata.server.config;
 
 import org.icgc.dcc.metadata.server.ServerMain;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
@@ -38,20 +38,18 @@ import com.mongodb.MongoClientURI;
 @EnableMongoRepositories(basePackageClasses = ServerMain.class)
 public class RepositoryConfig extends AbstractMongoConfiguration {
 
-  @Value("${mongo.database}")
-  private String dbName;
-  @Value("${mongo.url}")
-  private String url;
+  @Autowired
+  RepositoryProperties properties;
 
   @Override
   protected String getDatabaseName() {
-    return dbName;
+    return properties.getDatabase();
   }
 
   @Bean
   @Override
   public Mongo mongo() throws Exception {
-    return new MongoClient(new MongoClientURI(url));
+    return new MongoClient(new MongoClientURI(properties.createUrl()));
   }
 
   @Override

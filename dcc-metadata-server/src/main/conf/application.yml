@@ -23,13 +23,22 @@ management:
   address: 127.0.0.1
   port: 8444
 
-# Mongo
+# Mongo configuration
 mongo:
-  user: test
-  password: pass
-  database: meta
+
+  # User credentials. If commented do not use authentication.
+  #user: 
+  #password:
+
+  # Mongo database. Defaults to 'dcc-metadata' if undefined 
+  database: dcc-metadata
+  
+  # Mongo server: host[:port]
   server: localhost
-  url: mongodb://${mongo.user}:${mongo.password}@${mongo.server}
+  
+  # Replica servers. List of host[:port]
+  #replica: 
+  #  - localhost
 
 ---
 
