@@ -63,8 +63,8 @@ public class EntityResourceTest {
   @Mock
   EntityRepository repository;
 
-  Entity responseEntity = new Entity();
-  Entity responseEntity2 = new Entity();
+  Entity responseEntity;
+  Entity responseEntity2;
 
   @InjectMocks
   EntityResource resource;
