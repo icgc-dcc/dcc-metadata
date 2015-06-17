@@ -18,22 +18,22 @@
 package org.icgc.dcc.metadata.server.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.singletonList;
+import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import lombok.val;
 
-import org.icgc.dcc.metadata.core.http.Headers;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -42,8 +42,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.common.collect.Lists;
 
 @RestController
 @RequestMapping("/entities")
@@ -64,17 +62,17 @@ public class EntityResource {
   }
 
   @RequestMapping
-  public ResponseEntity<List<Entity>> find(@RequestParam("gnosId") String gnosId,
-      @RequestParam("fileName") String fileName) {
-    List<Entity> entities = Lists.newArrayList();
+  public ResponseEntity<Page<Entity>> find(@RequestParam(required = false) String gnosId,
+      @RequestParam(required = false) String fileName, @PageableDefault(sort = { "id" }) Pageable pageable) {
+    Page<Entity> entities = null;
     if (isNullOrEmpty(gnosId) && isNullOrEmpty(fileName)) {
-      entities = repository.findAll();
+      entities = repository.findAll(pageable);
     } else if (isNullOrEmpty(gnosId)) {
-      entities = repository.findByFileName(fileName);
+      entities = repository.findByFileName(fileName, pageable);
     } else if (isNullOrEmpty(fileName)) {
-      entities = repository.findByGnosId(gnosId);
+      entities = repository.findByGnosId(gnosId, pageable);
     } else {
-      entities = singletonList(repository.findByGnosIdAndFileName(gnosId, fileName));
+      entities = repository.findByGnosIdAndFileName(gnosId, fileName, pageable);
     }
 
     return ResponseEntity.ok(entities);
@@ -103,7 +101,7 @@ public class EntityResource {
 
   private static MultiValueMap<String, String> createConflictHeaders(Entity entity) {
     val result = new LinkedMultiValueMap<String, String>();
-    result.add(Headers.ENTITY_ID_HEADER, entity.getId());
+    result.add(ENTITY_ID_HEADER, entity.getId());
 
     return result;
   }

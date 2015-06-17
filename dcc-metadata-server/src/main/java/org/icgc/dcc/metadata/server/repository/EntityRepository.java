@@ -17,16 +17,18 @@
  */
 package org.icgc.dcc.metadata.server.repository;
 
-import java.util.List;
-
 import org.icgc.dcc.metadata.server.model.Entity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface EntityRepository extends MongoRepository<Entity, String> {
 
-  List<Entity> findByFileName(String fileName);
+  Page<Entity> findByFileName(String fileName, Pageable pageable);
 
-  List<Entity> findByGnosId(String gnosId);
+  Page<Entity> findByGnosId(String gnosId, Pageable pageable);
+
+  Page<Entity> findByGnosIdAndFileName(String gnosId, String fileName, Pageable pageable);
 
   Entity findByGnosIdAndFileName(String gnosId, String fileName);
 
