@@ -24,15 +24,15 @@ Examples
 
 ##### Save entity
 ```bash
-curl -XPOST http://localhost:8080/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt"}'
+curl -k -XPOST https://localhost:8443/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt"}'
 ```
 
 ##### Find entities
 ```bash
-curl http://localhost:8080/entities?gnosId=zzz123&fileName=1.txt
+curl -k https://localhost:8443/entities?gnosId=zzz123&fileName=1.txt
 ```
 
 ##### Get entity
 ```bash
-curl http://localhost:8080/entities/54321
+curl -k https://localhost:8443/entities/54321
 ```
