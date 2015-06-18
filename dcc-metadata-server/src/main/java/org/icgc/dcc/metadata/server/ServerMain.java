@@ -25,15 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.server.cli.ServerOptions;
 import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.actuate.autoconfigure.ManagementSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
 @Slf4j
-@Configuration
-@ComponentScan
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class, ManagementSecurityAutoConfiguration.class })
 public class ServerMain {
 
   /**

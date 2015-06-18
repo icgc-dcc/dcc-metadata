@@ -28,9 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.boot.actuate.autoconfigure.ManagementSecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,46 +44,40 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * Resource service configuration file.<br>
  * Protects resources with access token obtained at the authorization server.
  */
-public class SecurityConfig {
 
-  @Configuration
-  @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, ManagementSecurityAutoConfiguration.class })
-  protected static class DefaultSecurityConfig {}
+@Configuration
+@Profile("secure")
+@EnableWebSecurity
+@EnableResourceServer
+public class SecurityConfig extends ResourceServerConfigurerAdapter {
 
-  @Profile("secure")
-  @Configuration
-  @EnableWebSecurity
-  @EnableResourceServer
-  @EnableAutoConfiguration
-  protected static class EnabledSecurityConfig extends ResourceServerConfigurerAdapter {
+  private static final String ACCESS_CONFIG = "#oauth2.hasScope('os.upload') or #oauth2.hasScope('s3.upload')";
+  private TokenExtractor tokenExtractor = new BearerTokenExtractor();
 
-    private static final String ACCESS_CONFIG = "#oauth2.hasScope('os.upload') or #oauth2.hasScope('s3.upload')";
-    private TokenExtractor tokenExtractor = new BearerTokenExtractor();
+  @Override
+  public void configure(HttpSecurity http) throws Exception {
+    http.addFilterAfter(new OncePerRequestFilter() {
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-      http.addFilterAfter(new OncePerRequestFilter() {
-
-        @Override
-        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
-          // We don't want to allow access to a resource with no token so clear
-          // the security context in case it is actually an OAuth2Authentication
-          if (tokenExtractor.extract(request) == null) {
-            SecurityContextHolder.clearContext();
-          }
-          filterChain.doFilter(request, response);
+      @Override
+      protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+          FilterChain filterChain)
+          throws ServletException, IOException {
+        // We don't want to allow access to a resource with no token so clear
+        // the security context in case it is actually an OAuth2Authentication
+        if (tokenExtractor.extract(request) == null) {
+          SecurityContextHolder.clearContext();
         }
+        filterChain.doFilter(request, response);
+      }
 
-      }, AbstractPreAuthenticatedProcessingFilter.class);
+    }, AbstractPreAuthenticatedProcessingFilter.class);
 
-      http.csrf().disable();
-      configureAuthorization(http);
-    }
+    http.csrf().disable();
+    configureAuthorization(http);
+  }
 
-    private static void configureAuthorization(HttpSecurity http) throws Exception {
-      // @formatter:off
+  private static void configureAuthorization(HttpSecurity http) throws Exception {
+    // @formatter:off
       http
         .authorizeRequests()
         .antMatchers(POST,"/entities/**")
@@ -101,7 +92,6 @@ public class SecurityConfig {
         .anyRequest()
         .permitAll();
       // @formatter:on
-    }
   }
 
 }

@@ -29,10 +29,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 @Configuration
 @Profile("secure")
@@ -60,6 +63,21 @@ public class RetryConfig {
     result.registerListener(new DefaultRetryListener(clientRetryListener));
 
     return result;
+  }
+
+  @Bean
+  public ClientRetryListener clientRetryListener() {
+    return new ClientRetryListener() {
+
+      @Override
+      public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
+          Throwable throwable) {
+        if (throwable instanceof InvalidTokenException) {
+          this.retry = false;
+        }
+      }
+    };
+
   }
 
   private BackOffPolicy defineBackOffPolicy() {
