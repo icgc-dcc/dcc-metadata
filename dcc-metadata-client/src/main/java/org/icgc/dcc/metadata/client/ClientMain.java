@@ -71,7 +71,6 @@ public class ClientMain {
         return;
       }
 
-      banner("Running with {}", options);
       execute(options, args);
     } catch (ParameterException e) {
       log.error("Invalid parameter(s): ", e);
@@ -86,6 +85,7 @@ public class ClientMain {
 
   private static void execute(ClientOptions options, String[] args) {
     val context = SpringApplication.run(ClientMain.class, args);
+    banner("Running with {}", options);
     val client = context.getBean(MetadataClient.class);
     log.info("{}\n", repeat("-", 100));
 

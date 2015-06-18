@@ -19,3 +19,4 @@ server:
     # E.g. TIMEOUT(n) = TIMEOUT(n-1) * MULTIPLIER
     multiplier: 2.0
 
+spring.main.show_banner: false

@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.metadata.client.core;
 
+import static java.lang.System.out;
 import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
 
 import java.io.File;
@@ -44,6 +45,8 @@ public class MetadataClient {
 
   @SneakyThrows
   public void register(File inputDir, File outputDir, String manifestFileName) {
+    out.printf("Reading %s directory%n", inputDir.getCanonicalPath());
+    out.printf("Saving manifest to %s/%s%n%n", outputDir.getCanonicalPath(), manifestFileName);
     log.info("Regisitering: inputDir: {}, outputDir: {}, manifestFileName: {}",
         inputDir.getCanonicalPath(),
         outputDir.getCanonicalPath(),
@@ -61,10 +64,12 @@ public class MetadataClient {
 
   private List<Entity> register(List<GNOSFile> files) {
     val registeredEntities = ImmutableList.<Entity> builder();
+    int counter = 1;
 
     for (val file : files) {
       val entity = registrationService.register(file.getGnosId(), file.getFileName());
       registeredEntities.add(entity);
+      out.printf("[%d/%d] Registered %s%n", counter++, files.size(), file.getFileName());
     }
 
     return registeredEntities.build();
