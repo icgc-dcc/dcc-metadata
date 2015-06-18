@@ -1,3 +1,15 @@
 #!/bin/bash
 #
 # Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
+#
+# Description:
+#   Runs the dcc-metadata-client to register GNOS entities on the metadata server.
+#
+
+base_dir=$(dirname $0)/..
+java \
+  -jar ${base_dir}/lib/dcc-metadata-client.jar \
+  --spring.config.location=${base_dir}/conf/application.yml \
+  --logging.config=${base_dir}/conf/logback.xml \
+  --logging.path=${base_dir}/logs \
+  "$@" 

@@ -62,6 +62,18 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -81,5 +93,11 @@
       </plugin>
     </plugins>
   </build>
+
+  <properties>
+    <!-- Spring -->
+    <main.class>org.icgc.dcc.metadata.client.ClientMain</main.class>
+    <start-class>${main.class}</start-class>
+  </properties>
 
 </project>
