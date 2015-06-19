@@ -30,13 +30,13 @@ public class ClientOptions {
    * Input
    */
   @Parameter(names = { "-i", "--input-dir" }, help = true, description = "The input directory")
-  public File inputDir = new File("src/test/resources/fixtures/70b07570-0571-11e5-a6c0-1697f925ec7b");
+  public File inputDir;
 
   /**
    * Output
    */
   @Parameter(names = { "-o", "--output-dir" }, help = true, description = "The output directory")
-  public File outputDir = new File(".");
+  public File outputDir;
   @Parameter(names = { "-m", "--manifest-filename" }, help = true, description = "The manifest file name to be created in the output directory")
   public String manifestFileName = "manifest.txt";
 

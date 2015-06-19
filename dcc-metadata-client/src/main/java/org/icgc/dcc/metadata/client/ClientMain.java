@@ -17,8 +17,10 @@
  */
 package org.icgc.dcc.metadata.client;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.repeat;
 import static java.lang.System.err;
+import static java.lang.System.out;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,8 +51,26 @@ public class ClientMain {
 
     try {
       cli.parse(args);
+      if (options.help) {
+        usage(cli);
+        return;
+      }
 
-      banner("Running with {}", options);
+      if (options.version) {
+        version();
+        return;
+      }
+
+      if (options.inputDir == null) {
+        err.println("The input directory is unset.");
+        return;
+      }
+
+      if (options.outputDir == null) {
+        err.println("The output directory is unset.");
+        return;
+      }
+
       execute(options, args);
     } catch (ParameterException e) {
       log.error("Invalid parameter(s): ", e);
@@ -65,6 +85,7 @@ public class ClientMain {
 
   private static void execute(ClientOptions options, String[] args) {
     val context = SpringApplication.run(ClientMain.class, args);
+    banner("Running with {}", options);
     val client = context.getBean(MetadataClient.class);
     log.info("{}\n", repeat("-", 100));
 
@@ -81,6 +102,11 @@ public class ClientMain {
     log.info("{}", repeat("-", 100));
     log.info(message, args);
     log.info("{}", repeat("-", 100));
+  }
+
+  private static void version() {
+    val version = firstNonNull(ClientMain.class.getPackage().getImplementationVersion(), "[unknown version]");
+    out.printf("DCC Metadata Client%nVersion %s%n", version);
   }
 
 }

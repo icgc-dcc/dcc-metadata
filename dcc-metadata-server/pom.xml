@@ -116,7 +116,6 @@
     <!-- Spring -->
     <main.class>org.icgc.dcc.metadata.server.ServerMain</main.class>
     <start-class>${main.class}</start-class>
-    <spring-maven-plugin.version>1.2.4.RELEASE</spring-maven-plugin.version>
   </properties>
 
 </project>
