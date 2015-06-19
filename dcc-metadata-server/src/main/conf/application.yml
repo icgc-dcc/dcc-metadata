@@ -23,23 +23,6 @@ management:
   address: 127.0.0.1
   port: 8444
 
-# Mongo configuration
-mongo:
-
-  # User credentials. If commented do not use authentication.
-  #user: 
-  #password:
-
-  # Mongo database. Defaults to 'dcc-metadata' if undefined 
-  database: dcc-metadata
-  
-  # Mongo server: host[:port]
-  server: localhost
-  
-  # Replica servers. List of host[:port]
-  #replica: 
-  #  - localhost
-
 ---
 
 ###################################################################################################
@@ -49,7 +32,13 @@ mongo:
 # Spring
 spring:
   profiles: production
-  profiles.include: secure,development
+  profiles.include: secure
+  
+# Mongo
+spring.data.mongodb:
+  uri: mongodb://localhost/dcc-metadata
+  # username: 
+  # password:   
 
 ---
 
@@ -60,6 +49,10 @@ spring:
 # Spring
 spring:
   profiles: development
+
+# Mongo
+spring.data.mongodb:
+  uri: mongodb://localhost/dcc-metadata  
    
 ---
 
