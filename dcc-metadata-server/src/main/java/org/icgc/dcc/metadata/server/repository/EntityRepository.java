@@ -21,15 +21,27 @@ import org.icgc.dcc.metadata.server.model.Entity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RestResource;
 
-public interface EntityRepository extends MongoRepository<Entity, String> {
+public interface EntityRepository extends MongoRepository<Entity, String>, EntityRepositoryCustom {
 
-  Page<Entity> findByFileName(String fileName, Pageable pageable);
+  Page<Entity> findByFileName(@Param("fileName") String fileName, Pageable pageable);
 
-  Page<Entity> findByGnosId(String gnosId, Pageable pageable);
+  Page<Entity> findByGnosId(@Param("gnosId") String gnosId, Pageable pageable);
 
-  Page<Entity> findByGnosIdAndFileName(String gnosId, String fileName, Pageable pageable);
+  Page<Entity> findByGnosIdAndFileName(@Param("gnosId") String gnosId, @Param("fileName") String fileName,
+      Pageable pageable);
 
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
+  @RestResource(exported = false)
+  Entity findByGnosIdAndFileName(@Param("fileName") String gnosId, @Param("gnosId") String fileName);
+
+  @Override
+  @RestResource(exported = false)
+  void delete(String id);
+
+  @Override
+  @RestResource(exported = false)
+  void delete(Entity entity);
 
 }

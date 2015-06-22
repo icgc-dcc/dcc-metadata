@@ -22,7 +22,9 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @Data
 @Document(collection = "Entity")
 public class Entity {

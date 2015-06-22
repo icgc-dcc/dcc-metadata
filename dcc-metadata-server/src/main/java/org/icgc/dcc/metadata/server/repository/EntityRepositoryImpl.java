@@ -15,62 +15,46 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.repository;
 
-import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import javax.validation.Valid;
-
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.icgc.dcc.metadata.server.model.Entity;
-import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
 
-@RepositoryRestController
+@Repository
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class EntityResource extends AbstractResource {
+public class EntityRepositoryImpl implements EntityRepositoryCustom {
 
   @NonNull
-  private final EntityRepository repository;
-  @NonNull
-  private final PagedResourcesAssembler<Entity> pagedAssembler;
+  private MongoOperations mongo;
 
-  @RequestMapping(method = POST, value = "/entities")
-  public ResponseEntity<Entity> save(@Valid @RequestBody Entity entity) {
-    val existing = repository.findByGnosIdAndFileName(entity.getGnosId(), entity.getFileName());
-    if (existing != null) {
-      return new ResponseEntity<>(createConflictHeaders(existing), CONFLICT);
+  @Override
+  public Page<Entity> findByExample(@NonNull Entity example, @NonNull Pageable pageable) {
+    val query = new Query().with(pageable);
+    if (example.getId() != null) {
+      query.addCriteria(where("id").is(example.getId()));
+    }
+    if (example.getGnosId() != null) {
+      query.addCriteria(where("gnosId").is(example.getGnosId()));
+    }
+    if (example.getFileName() != null) {
+      query.addCriteria(where("fileName").is(example.getFileName()));
     }
 
-    return ResponseEntity.ok(repository.save(entity));
-  }
+    val count = mongo.count(query, Entity.class);
+    val result = mongo.find(query, Entity.class);
 
-  @RequestMapping(method = GET, value = "/entities/test")
-  public ResponseEntity<PagedResources<Resource<Entity>>> get(@Valid Entity entity, Pageable pageable) {
-    return ResponseEntity.ok(pagedAssembler.toResource(repository.findByExample(entity, pageable)));
-  }
-
-  private static MultiValueMap<String, String> createConflictHeaders(Entity entity) {
-    val result = new LinkedMultiValueMap<String, String>();
-    result.add(ENTITY_ID_HEADER, entity.getId());
-
-    return result;
+    return new PageImpl<Entity>(result, pageable, count);
   }
 
 }

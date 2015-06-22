@@ -15,33 +15,14 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.config;
+package org.icgc.dcc.metadata.server.repository;
 
 import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.boot.autoconfigure.data.rest.SpringBootRepositoryRestMvcConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-@Configuration
-public class RepositoryConfig extends SpringBootRepositoryRestMvcConfiguration {
+public interface EntityRepositoryCustom {
 
-  @Bean
-  public LocalValidatorFactoryBean validator() {
-    return new LocalValidatorFactoryBean();
-  }
-
-  @Bean
-  public ValidatingMongoEventListener validatingMongoEventListener() {
-    return new ValidatingMongoEventListener(validator());
-  }
-
-  @Override
-  protected void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    // http://tommyziegler.com/how-to-expose-the-resourceid-with-spring-data-rest/
-    config.exposeIdsFor(Entity.class);
-  }
+  Page<Entity> findByExample(Entity example, Pageable pageable);
 
 }

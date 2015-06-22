@@ -15,33 +15,49 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.config;
+package org.icgc.dcc.metadata.server.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.OK;
+import lombok.val;
+
+import org.icgc.dcc.metadata.server.ServerMain;
 import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.boot.autoconfigure.data.rest.SpringBootRepositoryRestMvcConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.client.RestTemplate;
 
-@Configuration
-public class RepositoryConfig extends SpringBootRepositoryRestMvcConfiguration {
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = ServerMain.class)
+@WebAppConfiguration
+@IntegrationTest(value = { "spring.config.location=src/main/conf/", "spring.profiles.active=development" })
+public class EntityResourceIntegrationTest {
 
-  @Bean
-  public LocalValidatorFactoryBean validator() {
-    return new LocalValidatorFactoryBean();
+  final String BASE_URL_ENTITY = "https://localhost:8443/entities/";
+
+  RestTemplate rest = new TestRestTemplate();
+
+  @Autowired
+  MongoTemplate mongoTemplate;
+
+  @Before
+  public void setUp() {
+    mongoTemplate.dropCollection(Entity.class);
   }
 
-  @Bean
-  public ValidatingMongoEventListener validatingMongoEventListener() {
-    return new ValidatingMongoEventListener(validator());
-  }
-
-  @Override
-  protected void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    // http://tommyziegler.com/how-to-expose-the-resourceid-with-spring-data-rest/
-    config.exposeIdsFor(Entity.class);
+  @Test
+  public void testCreateEntity() {
+    val entity = new Entity();
+    val response = rest.postForEntity(BASE_URL_ENTITY, entity, Entity.class);
+    assertThat(response.getStatusCode()).isEqualTo(OK);
   }
 
 }

@@ -15,33 +15,34 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.config;
+package org.icgc.dcc.metadata.server.resource;
 
-import org.icgc.dcc.metadata.server.model.Entity;
-import org.springframework.boot.autoconfigure.data.rest.SpringBootRepositoryRestMvcConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import lombok.val;
 
-@Configuration
-public class RepositoryConfig extends SpringBootRepositoryRestMvcConfiguration {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.data.rest.core.RepositoryConstraintViolationException;
+import org.springframework.data.rest.webmvc.support.RepositoryConstraintViolationExceptionMessage;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-  @Bean
-  public LocalValidatorFactoryBean validator() {
-    return new LocalValidatorFactoryBean();
+public abstract class AbstractResource {
+
+  @Autowired
+  private MessageSource messageSource;
+
+  @ExceptionHandler
+  ResponseEntity<RepositoryConstraintViolationExceptionMessage> handleRepositoryConstraintViolationException(
+      RepositoryConstraintViolationException e) {
+    val message = new RepositoryConstraintViolationExceptionMessage(e, new MessageSourceAccessor(messageSource));
+    return response(HttpStatus.BAD_REQUEST, new HttpHeaders(), message);
   }
 
-  @Bean
-  public ValidatingMongoEventListener validatingMongoEventListener() {
-    return new ValidatingMongoEventListener(validator());
-  }
-
-  @Override
-  protected void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    // http://tommyziegler.com/how-to-expose-the-resourceid-with-spring-data-rest/
-    config.exposeIdsFor(Entity.class);
+  private static <T> ResponseEntity<T> response(HttpStatus status, HttpHeaders headers, T body) {
+    return new ResponseEntity<T>(body, headers, status);
   }
 
 }
