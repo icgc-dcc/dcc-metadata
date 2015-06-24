@@ -19,30 +19,28 @@ package org.icgc.dcc.metadata.server.resource;
 
 import lombok.val;
 
+import org.icgc.dcc.metadata.server.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.data.rest.core.RepositoryConstraintViolationException;
-import org.springframework.data.rest.webmvc.support.RepositoryConstraintViolationExceptionMessage;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.stereotype.Component;
 
-public abstract class AbstractResource {
+@Component
+public class EntityResourceProcessor implements ResourceProcessor<Resource<Entity>> {
 
   @Autowired
-  private MessageSource messageSource;
+  EntityLinks entityLinks;
 
-  @ExceptionHandler
-  ResponseEntity<RepositoryConstraintViolationExceptionMessage> handleRepositoryConstraintViolationException(
-      RepositoryConstraintViolationException e) {
-    val message = new RepositoryConstraintViolationExceptionMessage(e, new MessageSourceAccessor(messageSource));
-    return response(HttpStatus.BAD_REQUEST, new HttpHeaders(), message);
-  }
+  @Override
+  public Resource<Entity> process(Resource<Entity> resource) {
+    val hasSelf = resource.getLink(Link.REL_SELF) != null;
+    if (!hasSelf) {
+      resource.add(entityLinks.linkForSingleResource(resource.getContent()).withSelfRel());
+    }
 
-  private static <T> ResponseEntity<T> response(HttpStatus status, HttpHeaders headers, T body) {
-    return new ResponseEntity<T>(body, headers, status);
+    return resource;
   }
 
 }

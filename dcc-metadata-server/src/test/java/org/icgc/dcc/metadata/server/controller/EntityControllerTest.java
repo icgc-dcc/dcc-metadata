@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 import lombok.val;
 
+import org.icgc.dcc.metadata.server.controller.EntityController;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.junit.Before;
@@ -57,7 +58,7 @@ import com.google.common.collect.ImmutableList;
 
 @Ignore("Test is broken since the move to Spring Data REST. Use EntityResourceIntegrationTest instead")
 @RunWith(MockitoJUnitRunner.class)
-public class EntityResourceTest {
+public class EntityControllerTest {
 
   private static final String ID_1 = "123";
   private static final String ID_2 = "321";
@@ -75,7 +76,7 @@ public class EntityResourceTest {
   Entity responseEntity2;
 
   @InjectMocks
-  EntityResource resource;
+  EntityController resource;
 
   private MockMvc mockMvc;
 

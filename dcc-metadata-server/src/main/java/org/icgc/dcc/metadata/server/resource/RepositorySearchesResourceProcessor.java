@@ -15,28 +15,42 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.model;
+package org.icgc.dcc.metadata.server.resource;
 
-import lombok.Data;
+import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import lombok.val;
 
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.hateoas.Identifiable;
-import org.springframework.validation.annotation.Validated;
+import org.icgc.dcc.metadata.server.controller.EntityController;
+import org.springframework.data.rest.webmvc.RepositorySearchesResource;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.UriTemplate;
+import org.springframework.stereotype.Component;
 
-@Validated
-@Data
-@Document(collection = "Entity")
-public class Entity implements Identifiable<String> {
+@Component
+public class RepositorySearchesResourceProcessor implements ResourceProcessor<RepositorySearchesResource> {
 
-  @Id
-  private String id;
+  @Override
+  public RepositorySearchesResource process(RepositorySearchesResource resource) {
+    resource.add(createLink());
 
-  @NotEmpty
-  private String gnosId;
+    return resource;
+  }
 
-  @NotEmpty
-  private String fileName;
+  private static Link createLink() {
+    val rel = "findByExample";
+    val href = linkTo(methodOn(EntityController.class).findByExample(null, null)).toString();
+    val uriTemplate = new UriTemplate(href)
+        .with("id", REQUEST_PARAM)
+        .with("gnosId", REQUEST_PARAM)
+        .with("fileName", REQUEST_PARAM)
+        .with("page", REQUEST_PARAM)
+        .with("size", REQUEST_PARAM)
+        .with("sort", REQUEST_PARAM);
+
+    return new Link(uriTemplate, rel);
+  }
 
 }

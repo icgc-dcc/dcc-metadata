@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RepositoryRestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class EntityResource extends AbstractResource {
+public class EntityController extends AbstractController {
 
   @NonNull
   private final EntityRepository repository;
@@ -61,9 +61,11 @@ public class EntityResource extends AbstractResource {
     return ResponseEntity.ok(repository.save(entity));
   }
 
-  @RequestMapping(method = GET, value = "/entities/test")
-  public ResponseEntity<PagedResources<Resource<Entity>>> get(@Valid Entity entity, Pageable pageable) {
-    return ResponseEntity.ok(pagedAssembler.toResource(repository.findByExample(entity, pageable)));
+  @RequestMapping(method = GET, value = "/entities/search/findByExample")
+  public ResponseEntity<PagedResources<Resource<Entity>>> findByExample(@Valid Entity entity, Pageable pageable) {
+    val entities = repository.findByExample(entity, pageable);
+
+    return ResponseEntity.ok(pagedAssembler.toResource(entities));
   }
 
   private static MultiValueMap<String, String> createConflictHeaders(Entity entity) {
