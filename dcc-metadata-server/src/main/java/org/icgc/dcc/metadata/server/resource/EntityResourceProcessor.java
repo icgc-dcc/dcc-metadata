@@ -17,7 +17,8 @@
  */
 package org.icgc.dcc.metadata.server.resource;
 
-import lombok.val;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +29,30 @@ import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EntityResourceProcessor implements ResourceProcessor<Resource<Entity>> {
 
-  @Autowired
-  EntityLinks entityLinks;
+  /**
+   * Dependencies.
+   */
+  @NonNull
+  private final EntityLinks entityLinks;
 
   @Override
   public Resource<Entity> process(Resource<Entity> resource) {
-    val hasSelf = resource.getLink(Link.REL_SELF) != null;
-    if (!hasSelf) {
-      resource.add(entityLinks.linkForSingleResource(resource.getContent()).withSelfRel());
+    if (!hasSelf(resource)) {
+      resource.add(createSelfLink(resource));
     }
 
     return resource;
+  }
+
+  private boolean hasSelf(Resource<Entity> resource) {
+    return resource.getLink(Link.REL_SELF) != null;
+  }
+
+  private Link createSelfLink(Resource<Entity> resource) {
+    return entityLinks.linkForSingleResource(resource.getContent()).withSelfRel();
   }
 
 }

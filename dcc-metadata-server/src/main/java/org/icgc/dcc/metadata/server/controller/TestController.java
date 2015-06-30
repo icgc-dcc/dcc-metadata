@@ -15,43 +15,21 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
-import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import lombok.val;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import org.icgc.dcc.metadata.server.controller.EntityController;
-import org.springframework.data.rest.webmvc.RepositorySearchesResource;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceProcessor;
-import org.springframework.hateoas.UriTemplate;
-import org.springframework.stereotype.Component;
+import org.icgc.dcc.metadata.server.model.Entity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Component
-public class RepositorySearchesResourceProcessor implements ResourceProcessor<RepositorySearchesResource> {
+@RestController
+public class TestController extends AbstractController {
 
-  @Override
-  public RepositorySearchesResource process(RepositorySearchesResource resource) {
-    resource.add(createLink());
-
-    return resource;
-  }
-
-  private static Link createLink() {
-    val rel = "findByExample";
-    val href = linkTo(methodOn(EntityController.class).findByExample(null, null)).toString();
-    val uriTemplate = new UriTemplate(href)
-        .with("id", REQUEST_PARAM)
-        .with("gnosId", REQUEST_PARAM)
-        .with("fileName", REQUEST_PARAM)
-
-        .with("page", REQUEST_PARAM)
-        .with("size", REQUEST_PARAM)
-        .with("sort", REQUEST_PARAM);
-
-    return new Link(uriTemplate, rel);
+  @RequestMapping(method = POST, value = "/test/entities")
+  public void save(@RequestBody Entity entity) {
+    System.out.println(entity);
   }
 
 }
