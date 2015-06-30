@@ -28,6 +28,7 @@ import org.icgc.dcc.metadata.client.cli.ClientOptions;
 import org.icgc.dcc.metadata.client.core.MetadataClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -76,6 +77,9 @@ public class ClientMain {
       log.error("Invalid parameter(s): ", e);
       err.println("Invalid parameter(s): " + e.getMessage());
       usage(cli);
+    } catch (HttpClientErrorException e) {
+      err.println(e.getMessage());
+      System.exit(FAILURE_STATUS_CODE);
     } catch (Exception e) {
       log.error("Unknown error: ", e);
       err.println("Unknow error. Please check the log for detailed error messages: " + e.getMessage());

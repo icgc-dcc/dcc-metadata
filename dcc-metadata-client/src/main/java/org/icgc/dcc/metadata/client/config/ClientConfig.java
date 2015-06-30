@@ -23,7 +23,9 @@ import static org.icgc.dcc.metadata.core.retry.RetryPolicies.getRetryableExcepti
 import static org.springframework.retry.backoff.ExponentialBackOffPolicy.DEFAULT_MULTIPLIER;
 import lombok.val;
 
+import org.icgc.dcc.metadata.core.retry.ClientRetryListener;
 import org.icgc.dcc.metadata.core.retry.DefaultRetryListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +55,9 @@ public class ClientConfig {
   @Value("${server.connection.multiplier}")
   private double multiplier = DEFAULT_MULTIPLIER;
 
+  @Autowired
+  private ClientRetryListener clientRetryListener;
+
   @Bean
   public RestTemplate restTemplate(@Value("${accessToken}") String accessToken) {
     val details = new AuthorizationCodeResourceDetails();
@@ -71,7 +76,7 @@ public class ClientConfig {
     retryableExceptions.put(HttpClientErrorException.class, FALSE);
 
     result.setRetryPolicy(new SimpleRetryPolicy(maxRetries, retryableExceptions, true));
-    result.registerListener(new DefaultRetryListener());
+    result.registerListener(new DefaultRetryListener(clientRetryListener));
 
     return result;
   }
