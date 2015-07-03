@@ -33,10 +33,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-import lombok.val;
 
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
+import org.icgc.dcc.metadata.server.service.DuplicateEntityException;
+import org.icgc.dcc.metadata.server.service.EntityService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +51,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.google.common.collect.ImmutableList;
 
+import lombok.val;
+
 @RunWith(MockitoJUnitRunner.class)
 public class EntityResourceTest {
 
@@ -62,6 +65,8 @@ public class EntityResourceTest {
 
   @Mock
   EntityRepository repository;
+  @Mock
+  EntityService service;
 
   Entity responseEntity;
   Entity responseEntity2;
@@ -156,8 +161,8 @@ public class EntityResourceTest {
   }
 
   @Test
-  public void saveTest() throws Exception {
-    when(repository.save(any(Entity.class))).thenReturn(responseEntity);
+  public void registerTest() throws Exception {
+    when(service.register(any(Entity.class))).thenReturn(responseEntity);
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
@@ -171,7 +176,7 @@ public class EntityResourceTest {
   @Test
   public void saveTest_duplicate() throws Exception {
     when(repository.findByGnosIdAndFileName(GNOS_ID_1, FILE_NAME_1)).thenReturn(responseEntity);
-    when(repository.save(any(Entity.class))).thenReturn(responseEntity);
+    when(service.register(any(Entity.class))).thenThrow(new DuplicateEntityException(responseEntity));
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)

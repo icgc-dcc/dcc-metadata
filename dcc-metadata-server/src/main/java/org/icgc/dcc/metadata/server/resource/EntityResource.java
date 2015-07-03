@@ -26,16 +26,16 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import javax.validation.Valid;
 
-import lombok.val;
-
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
+import org.icgc.dcc.metadata.server.service.DuplicateEntityException;
+import org.icgc.dcc.metadata.server.service.EntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,27 +43,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @RestController
 @RequestMapping("/entities")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EntityResource {
 
+  /**
+   * Dependencies.
+   */
   @Autowired
-  EntityRepository repository;
+  private final EntityRepository repository;
+  @Autowired
+  private final EntityService service;
 
   @RequestMapping("/{id}")
   public ResponseEntity<Entity> get(@PathVariable("id") String id) {
     val entity = repository.findOne(id);
-
     if (entity == null) {
-      return new ResponseEntity<Entity>(NOT_FOUND);
+      return new ResponseEntity<>(NOT_FOUND);
     }
 
     return ResponseEntity.ok(entity);
   }
 
   @RequestMapping
-  public ResponseEntity<Page<Entity>> find(@RequestParam(required = false) String gnosId,
-      @RequestParam(required = false) String fileName, @PageableDefault(sort = { "id" }) Pageable pageable) {
+  public ResponseEntity<Page<Entity>> find(
+      @RequestParam(required = false) String gnosId,
+      @RequestParam(required = false) String fileName,
+      @PageableDefault(sort = { "id" }) Pageable pageable) {
     Page<Entity> entities = null;
     if (isNullOrEmpty(gnosId) && isNullOrEmpty(fileName)) {
       entities = repository.findAll(pageable);
@@ -80,30 +90,23 @@ public class EntityResource {
 
   @RequestMapping(value = "/{id}", method = HEAD)
   public ResponseEntity<?> exists(@PathVariable("id") String id) {
-    val exists = repository.exists(id);
-
-    if (!exists) {
-      return new ResponseEntity<>(NOT_FOUND);
-    }
-
-    return ResponseEntity.ok(null);
+    return repository.exists(id) ? ResponseEntity.ok(null) : new ResponseEntity<>(NOT_FOUND);
   }
 
   @RequestMapping(method = POST)
-  public ResponseEntity<Entity> save(@RequestBody @Valid Entity entity) {
-    val existing = repository.findByGnosIdAndFileName(entity.getGnosId(), entity.getFileName());
-    if (existing != null) {
-      return new ResponseEntity<>(createConflictHeaders(existing), CONFLICT);
+  public ResponseEntity<Entity> register(@RequestBody @Valid Entity entity) {
+    try {
+      return ResponseEntity.ok(service.register(entity));
+    } catch (DuplicateEntityException e) {
+      return new ResponseEntity<>(createConflictHeaders(e.getExisting()), CONFLICT);
     }
-
-    return ResponseEntity.ok(repository.save(entity));
   }
 
   private static MultiValueMap<String, String> createConflictHeaders(Entity entity) {
-    val result = new LinkedMultiValueMap<String, String>();
-    result.add(ENTITY_ID_HEADER, entity.getId());
+    val headers = new HttpHeaders();
+    headers.set(ENTITY_ID_HEADER, entity.getId());
 
-    return result;
+    return headers;
   }
 
 }
