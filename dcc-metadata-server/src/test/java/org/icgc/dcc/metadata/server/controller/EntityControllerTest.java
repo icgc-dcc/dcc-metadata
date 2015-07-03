@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
+import org.icgc.dcc.metadata.server.controller.EntityController;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.icgc.dcc.metadata.server.service.DuplicateEntityException;
@@ -54,7 +55,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.val;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EntityResourceTest {
+public class EntityControllerTest {
 
   private static final String ID_1 = "123";
   private static final String ID_2 = "321";
@@ -72,7 +73,7 @@ public class EntityResourceTest {
   Entity responseEntity2;
 
   @InjectMocks
-  EntityResource resource;
+  EntityController controller;
 
   private MockMvc mockMvc;
 
@@ -81,7 +82,7 @@ public class EntityResourceTest {
     responseEntity = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1);
     responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2);
 
-    mockMvc = standaloneSetup(resource)
+    mockMvc = standaloneSetup(controller)
         .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
         .build();
   }

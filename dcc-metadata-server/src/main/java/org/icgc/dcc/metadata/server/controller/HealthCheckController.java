@@ -15,15 +15,18 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * For system monitoring purposes. Not used by the application proper.
+ */
 @RestController
-public class HealthCheckEndpoint {
+public class HealthCheckController {
 
   @RequestMapping(value = "/health", method = GET)
   public String healthCheck() {

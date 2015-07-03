@@ -62,7 +62,7 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
       protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
           FilterChain filterChain)
           throws ServletException, IOException {
-        // We don't want to allow access to a resource with no token so clear
+        // We don't want to allow access to a controller with no token so clear
         // the security context in case it is actually an OAuth2Authentication
         if (tokenExtractor.extract(request) == null) {
           SecurityContextHolder.clearContext();

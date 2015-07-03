@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.resource;
+package org.icgc.dcc.metadata.server.controller;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
@@ -49,7 +49,7 @@ import lombok.val;
 @RestController
 @RequestMapping("/entities")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
-public class EntityResource {
+public class EntityController {
 
   /**
    * Dependencies.
