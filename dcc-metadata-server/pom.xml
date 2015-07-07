@@ -116,6 +116,9 @@
     <!-- Spring -->
     <main.class>org.icgc.dcc.metadata.server.ServerMain</main.class>
     <start-class>${main.class}</start-class>
+    
+    <!-- Versions - MongoDB -->
+    <mongo.version>3.0.2</mongo.version>
   </properties>
 
 </project>
