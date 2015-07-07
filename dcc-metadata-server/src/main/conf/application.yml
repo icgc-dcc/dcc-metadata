@@ -37,8 +37,6 @@ spring:
 # Mongo
 spring.data.mongodb:
   uri: mongodb://localhost/dcc-metadata
-  # username: 
-  # password:   
 
 ---
 
