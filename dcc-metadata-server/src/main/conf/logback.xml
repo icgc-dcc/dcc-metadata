@@ -1,6 +1,6 @@
-<!--                                           -->
-<!-- DCC Metadata - Logging configuration      -->
-<!--                                           -->
+<!--                                             -->
+<!-- DCC Metadata Server - Logging configuration -->
+<!--                                             -->
 <configuration debug="false">
   <property name="log.dir" value="${LOG_PATH:-/tmp}"/>
   <property name="log.name" value="dcc-metadata-server" />
@@ -30,11 +30,11 @@
       <pattern>${pattern}</pattern>
     </encoder>
   </appender>
-  
+
   <logger name="org.icgc.dcc.metadata.server.service.EntityService" level="INFO" additivity="false">
     <appender-ref ref="AUDIT"/>
   </logger>
-  
+
   <root level="INFO">
     <appender-ref ref="FILE" />
   </root>
