@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-import org.icgc.dcc.metadata.server.controller.EntityController;
 import org.icgc.dcc.metadata.server.model.Entity;
 import org.icgc.dcc.metadata.server.repository.EntityRepository;
 import org.icgc.dcc.metadata.server.service.DuplicateEntityException;
@@ -63,13 +62,14 @@ public class EntityControllerTest {
   private static final String GNOS_ID_2 = "g321";
   private static final String FILE_NAME_2 = "f321";
   private static final String FILE_NAME_1 = "f123";
+  private static final long CREATED_TIME = 0;
 
   @Mock
   EntityRepository repository;
   @Mock
   EntityService service;
 
-  Entity responseEntity;
+  Entity responseEntity1;
   Entity responseEntity2;
 
   @InjectMocks
@@ -79,8 +79,8 @@ public class EntityControllerTest {
 
   @Before
   public void setUp() {
-    responseEntity = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1);
-    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2);
+    responseEntity1 = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, CREATED_TIME);
+    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2, CREATED_TIME);
 
     mockMvc = standaloneSetup(controller)
         .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -89,7 +89,7 @@ public class EntityControllerTest {
 
   @Test
   public void findTest_all() throws Exception {
-    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity, responseEntity2));
+    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1, responseEntity2));
     when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities"))
@@ -101,7 +101,7 @@ public class EntityControllerTest {
 
   @Test
   public void findTest_gnosId() throws Exception {
-    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity));
+    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     when(repository.findByGnosId(eq(GNOS_ID_1), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities?gnosId=" + GNOS_ID_1))
@@ -112,7 +112,7 @@ public class EntityControllerTest {
 
   @Test
   public void findTest_fileName() throws Exception {
-    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity));
+    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     when(repository.findByFileName(eq(FILE_NAME_1), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities?fileName=" + FILE_NAME_1))
@@ -123,7 +123,7 @@ public class EntityControllerTest {
 
   @Test
   public void findTest_fileName_gnosId() throws Exception {
-    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity));
+    val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     when(repository.findByGnosIdAndFileName(eq(GNOS_ID_1), eq(FILE_NAME_1), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get(format("/entities?fileName=%s&gnosId=%s", FILE_NAME_1, GNOS_ID_1)))
@@ -134,7 +134,7 @@ public class EntityControllerTest {
 
   @Test
   public void getTest() throws Exception {
-    when(repository.findOne(ID_1)).thenReturn(responseEntity);
+    when(repository.findOne(ID_1)).thenReturn(responseEntity1);
 
     mockMvc.perform(get("/entities/" + ID_1))
         .andExpect(status().isOk())
@@ -163,7 +163,7 @@ public class EntityControllerTest {
 
   @Test
   public void registerTest() throws Exception {
-    when(service.register(any(Entity.class))).thenReturn(responseEntity);
+    when(service.register(any(Entity.class))).thenReturn(responseEntity1);
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
@@ -171,13 +171,14 @@ public class EntityControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(ID_1)))
         .andExpect(jsonPath("$.gnosId", is(GNOS_ID_1)))
-        .andExpect(jsonPath("$.fileName", is(FILE_NAME_1)));
+        .andExpect(jsonPath("$.fileName", is(FILE_NAME_1)))
+        .andExpect(jsonPath("$.createdTime", is((int) CREATED_TIME)));
   }
 
   @Test
   public void saveTest_duplicate() throws Exception {
-    when(repository.findByGnosIdAndFileName(GNOS_ID_1, FILE_NAME_1)).thenReturn(responseEntity);
-    when(service.register(any(Entity.class))).thenThrow(new DuplicateEntityException(responseEntity));
+    when(repository.findByGnosIdAndFileName(GNOS_ID_1, FILE_NAME_1)).thenReturn(responseEntity1);
+    when(service.register(any(Entity.class))).thenThrow(new DuplicateEntityException(responseEntity1));
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
@@ -190,11 +191,12 @@ public class EntityControllerTest {
     return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
   }
 
-  private static Entity createEntity(String id, String gnosId, String fileName) {
+  private static Entity createEntity(String id, String gnosId, String fileName, long createdTime) {
     val result = new Entity();
     result.setId(id);
     result.setGnosId(gnosId);
     result.setFileName(fileName);
+    result.setCreatedTime(createdTime);
 
     return result;
   }

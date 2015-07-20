@@ -28,7 +28,9 @@ import com.google.common.base.Joiner;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EntityService {
@@ -41,6 +43,7 @@ public class EntityService {
 
   @NonNull
   public Entity register(Entity entity) {
+    log.info("Registering {}...", entity);
     val existing = repository.findByGnosIdAndFileName(entity.getGnosId(), entity.getFileName());
     if (existing != null) {
       throw new DuplicateEntityException(existing);
@@ -48,8 +51,12 @@ public class EntityService {
 
     val id = resolveFileId(entity.getGnosId(), entity.getFileName());
     entity.setId(id);
+    entity.setCreatedTime(System.currentTimeMillis());
 
-    return repository.save(entity);
+    val registered = repository.save(entity);
+    log.info("Successfully registered {}", entity);
+
+    return registered;
   }
 
   /**

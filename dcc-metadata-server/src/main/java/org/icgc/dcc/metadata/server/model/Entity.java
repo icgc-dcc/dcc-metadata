@@ -17,11 +17,11 @@
  */
 package org.icgc.dcc.metadata.server.model;
 
-import lombok.Data;
-
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Data;
 
 @Data
 @Document(collection = "Entity")
@@ -35,5 +35,7 @@ public class Entity {
 
   @NotEmpty
   private String fileName;
+
+  private Long createdTime;
 
 }
