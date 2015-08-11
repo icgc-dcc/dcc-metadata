@@ -17,17 +17,23 @@
  */
 package org.icgc.dcc.metadata.server.config;
 
+import static java.lang.String.format;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,19 +46,25 @@ import org.springframework.security.oauth2.provider.authentication.TokenExtracto
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.google.common.base.Joiner;
+
 /**
  * Resource service configuration file.<br>
  * Protects resources with access token obtained at the authorization server.
  */
-
+@Slf4j
 @Configuration
 @Profile("secure")
 @EnableWebSecurity
 @EnableResourceServer
 public class SecurityConfig extends ResourceServerConfigurerAdapter {
 
-  private static final String ACCESS_CONFIG = "#oauth2.hasScope('os.upload') or #oauth2.hasScope('s3.upload')";
+  private static final String PERMISSION_SEPARATOR = " or ";
+  private static final String PERMISSION_TEMPLATE = "#oauth2.hasScope('%s')";
   private TokenExtractor tokenExtractor = new BearerTokenExtractor();
+
+  @Autowired
+  private MetadataServerProperties properties;
 
   @Override
   public void configure(HttpSecurity http) throws Exception {
@@ -76,22 +88,34 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
     configureAuthorization(http);
   }
 
-  private static void configureAuthorization(HttpSecurity http) throws Exception {
+  private void configureAuthorization(HttpSecurity http) throws Exception {
+    val accessConfig = resolveUploadScopes();
     // @formatter:off
       http
         .authorizeRequests()
         .antMatchers(POST,"/entities/**")
-        .access(ACCESS_CONFIG)
+        .access(accessConfig)
         .antMatchers(PUT,"/entities/**")
-        .access(ACCESS_CONFIG)
+        .access(accessConfig)
         .antMatchers(DELETE,"/entities/**")
-        .access(ACCESS_CONFIG)
+        .access(accessConfig)
         .and()
         
         .authorizeRequests()
         .anyRequest()
         .permitAll();
       // @formatter:on
+  }
+
+  private String resolveUploadScopes() {
+    val uploadScopes = properties.getScopes().stream()
+        .map(s -> format(PERMISSION_TEMPLATE, s))
+        .collect(Collectors.toList());
+
+    val securityConfiguration = Joiner.on(PERMISSION_SEPARATOR).join(uploadScopes);
+    log.info("Resolved security configuration to: {}", securityConfiguration);
+
+    return securityConfiguration;
   }
 
 }
