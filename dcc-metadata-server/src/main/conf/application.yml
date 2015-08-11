@@ -22,6 +22,12 @@ management:
   context_path: /admin
   address: 127.0.0.1
   port: 8444
+  
+# Scopes that allow entities registration
+scopes:
+  - os.upload
+  - s3.upload
+  - tra.upload
 
 ---
 
