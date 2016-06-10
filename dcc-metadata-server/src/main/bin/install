@@ -70,7 +70,7 @@ logdir="$basedir/logs"
 
 # Maven artifact location
 name="dcc-metadata-server"
-server="http://seqwaremaven.oicr.on.ca/artifactory"
+server="https://artifacts.oicr.on.ca/artifactory"
 artifact="org/icgc/dcc/$name"
 
 if [[ -n $release ]]
