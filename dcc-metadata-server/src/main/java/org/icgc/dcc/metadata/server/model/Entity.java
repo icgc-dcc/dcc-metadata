@@ -36,6 +36,8 @@ public class Entity {
   @NotEmpty
   private String fileName;
 
+  private String projectCode;
+
   private Long createdTime;
 
 }

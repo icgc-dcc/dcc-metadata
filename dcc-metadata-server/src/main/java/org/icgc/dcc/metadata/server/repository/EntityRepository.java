@@ -32,4 +32,7 @@ public interface EntityRepository extends MongoRepository<Entity, String> {
 
   Entity findByGnosIdAndFileName(String gnosId, String fileName);
 
+  Page<Entity> findByProjectCode(String projectCode, Pageable pageable);
+
+  Page<Entity> findByProjectCodeAndFileName(String projectCode, String fileName, Pageable pageable);
 }

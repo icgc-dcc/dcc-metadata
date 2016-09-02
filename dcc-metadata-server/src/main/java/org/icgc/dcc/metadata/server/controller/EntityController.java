@@ -45,10 +45,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/entities")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EntityController {
 
   /**
@@ -61,6 +63,7 @@ public class EntityController {
 
   @RequestMapping("/{id}")
   public ResponseEntity<Entity> get(@PathVariable("id") String id) {
+
     val entity = repository.findOne(id);
     if (entity == null) {
       return new ResponseEntity<>(NOT_FOUND);
@@ -73,16 +76,31 @@ public class EntityController {
   public ResponseEntity<Page<Entity>> find(
       @RequestParam(required = false) String gnosId,
       @RequestParam(required = false) String fileName,
+      @RequestParam(required = false) String projectCode,
       @PageableDefault(sort = { "id" }) Pageable pageable) {
+
+    log.info(String.format("/find service invoked: gnosId = %s, fileName = %s, projectCode = %s", gnosId, fileName,
+        projectCode));
+
     Page<Entity> entities = null;
-    if (isNullOrEmpty(gnosId) && isNullOrEmpty(fileName)) {
+
+    // Note - If both gnosId and projectCode are encountered, only gnosId is used
+    if (isNullOrEmpty(gnosId) && isNullOrEmpty(fileName) && isNullOrEmpty(projectCode)) {
       entities = repository.findAll(pageable);
-    } else if (isNullOrEmpty(gnosId)) {
-      entities = repository.findByFileName(fileName, pageable);
-    } else if (isNullOrEmpty(fileName)) {
-      entities = repository.findByGnosId(gnosId, pageable);
-    } else {
-      entities = repository.findByGnosIdAndFileName(gnosId, fileName, pageable);
+    } else if (isNullOrEmpty(gnosId)) { // gnosId is null
+      if (isNullOrEmpty(projectCode)) { // gnosId and projectCode is null
+        entities = repository.findByFileName(fileName, pageable);
+      } else if (isNullOrEmpty(fileName)) { // projectCode not null, filename is null
+        entities = repository.findByProjectCode(projectCode, pageable);
+      } else { // projectCode is not null, fileName is not null
+        entities = repository.findByProjectCodeAndFileName(projectCode, fileName, pageable);
+      }
+    } else { // gnosId not null - supercedes project code
+      if (isNullOrEmpty(fileName)) {
+        entities = repository.findByGnosId(gnosId, pageable);
+      } else {
+        entities = repository.findByGnosIdAndFileName(gnosId, fileName, pageable);
+      }
     }
 
     return ResponseEntity.ok(entities);
@@ -108,5 +126,4 @@ public class EntityController {
 
     return headers;
   }
-
 }
