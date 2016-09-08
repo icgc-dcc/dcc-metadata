@@ -35,4 +35,5 @@ public interface EntityRepository extends MongoRepository<Entity, String> {
   Page<Entity> findByProjectCode(String projectCode, Pageable pageable);
 
   Page<Entity> findByProjectCodeAndFileName(String projectCode, String fileName, Pageable pageable);
+
 }

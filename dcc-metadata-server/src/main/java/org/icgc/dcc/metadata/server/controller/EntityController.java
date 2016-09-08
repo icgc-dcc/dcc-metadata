@@ -79,8 +79,7 @@ public class EntityController {
       @RequestParam(required = false) String projectCode,
       @PageableDefault(sort = { "id" }) Pageable pageable) {
 
-    log.info(String.format("/find service invoked: gnosId = %s, fileName = %s, projectCode = %s", gnosId, fileName,
-        projectCode));
+    log.info("/find service invoked: gnosId = {}, fileName = {}, projectCode = {}", gnosId, fileName, projectCode);
 
     Page<Entity> entities = null;
 
