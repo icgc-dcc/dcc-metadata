@@ -24,7 +24,7 @@ Examples
 
 ##### Save entity
 ```bash
-curl -k -XPOST https://localhost:8443/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt"}'
+curl -k -XPOST https://localhost:8443/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt","projectCode":"ABCD-CA"}'
 ```
 
 ##### Find entities
