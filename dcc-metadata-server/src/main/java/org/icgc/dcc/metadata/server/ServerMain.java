@@ -20,20 +20,21 @@ package org.icgc.dcc.metadata.server;
 
 import static com.google.common.base.Strings.repeat;
 import static java.lang.System.err;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.server.cli.ServerOptions;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.ManagementSecurityAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class, ManagementSecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 public class ServerMain {
 
   /**

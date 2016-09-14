@@ -179,6 +179,12 @@ public class EntityControllerTest {
   }
 
   @Test
+  public void registerTest_missingProjectCode() throws Exception {
+    // when(service.register(any(Entity.class))).thenReturn(responseEntity1);
+    service.register(createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, null, CREATED_TIME));
+  }
+
+  @Test
   public void saveTest_duplicate() throws Exception {
     when(repository.findByGnosIdAndFileName(GNOS_ID_1, FILE_NAME_1)).thenReturn(responseEntity1);
     when(service.register(any(Entity.class))).thenThrow(new DuplicateEntityException(responseEntity1));

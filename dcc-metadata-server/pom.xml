@@ -22,6 +22,10 @@
       <artifactId>dcc-metadata-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>dcc-common-test</artifactId>
+    </dependency>
 
     <!-- Spring -->
     <dependency>
@@ -48,8 +52,7 @@
       <groupId>org.springframework.retry</groupId>
       <artifactId>spring-retry</artifactId>
     </dependency>
-
-
+    
     <!-- Utilities -->
     <dependency>
       <groupId>com.beust</groupId>
@@ -74,7 +77,6 @@
       <artifactId>json-path</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -113,6 +115,23 @@
   </build>
 
   <properties>
+    <!-- Versions - Spring -->
+    <spring.version>4.3.2.RELEASE</spring.version>
+    <!-- Versions - Spring Security -->
+    <spring-security.version>4.1.1.RELEASE</spring-security.version>
+    <!-- Versions - Spring Boot -->
+    <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+    <!-- Versions - Spring Boot - Maven -->
+    <spring-boot-maven-plugin.version>${spring-boot.version}</spring-boot-maven-plugin.version>
+    <!-- Versions - Spring Boot - Logging -->
+    <logback.version>1.1.7</logback.version>
+    <!-- Versions - Spring Boot - H2 -->
+    <h2.version>1.4.192</h2.version>
+    <!-- Versions - Spring Boot - Jackson -->
+    <jackson.version>2.7.5</jackson.version>
+    <!-- Versions - Spring Boot - Slf4j -->
+    <slf4j.version>1.7.5</slf4j.version>
+  
     <!-- Spring -->
     <main.class>org.icgc.dcc.metadata.server.ServerMain</main.class>
     <start-class>${main.class}</start-class>
