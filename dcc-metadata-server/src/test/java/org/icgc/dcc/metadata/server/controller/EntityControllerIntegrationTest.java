@@ -71,6 +71,16 @@ public class EntityControllerIntegrationTest {
         .andExpect(status().is4xxClientError());
   }
 
+  @Test
+  public void testValidation_includingProjectCode() throws Exception {
+    // trigger validation - only happens when POSTing to endpoint
+    // doesn't work if invoking EntityController directly
+    mockMvc.perform(post("/entities")
+        .contentType(APPLICATION_JSON)
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, "RANDOM-PROJECT-CD")))
+        .andExpect(status().is2xxSuccessful());
+  }
+
   /**
    * Create Entity as string with no project code
    * @param gnosId
@@ -79,5 +89,10 @@ public class EntityControllerIntegrationTest {
    */
   private static String createEntityAsString(String gnosId, String fileName) {
     return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
+  }
+
+  private static String createEntityAsString(String gnosId, String fileName, String projectCode) {
+    return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"projectCode\":\"%s\"}", gnosId, fileName,
+        projectCode);
   }
 }
