@@ -196,8 +196,42 @@ public class EntityControllerTest {
         .andExpect(header().string(ENTITY_ID_HEADER, ID_1));
   }
 
+  /**
+   * Trigger validation by registering a new Entity via REST client to endpoint
+   * @throws Exception
+   */
+  @Test
+  public void validationTest_withProjectCode() throws Exception {
+    // trigger validation - only happens when POSTing to endpoint
+    // doesn't work if invoking EntityController directly
+    mockMvc.perform(post("/entities")
+        .contentType(APPLICATION_JSON)
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1)))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void validationTest_includingProjectCode() throws Exception {
+    // trigger validation - only happens when POSTing to endpoint
+    // doesn't work if invoking EntityController directly
+    mockMvc.perform(post("/entities")
+        .contentType(APPLICATION_JSON)
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, "RANDOM-PROJECT-CD")))
+        .andExpect(status().is2xxSuccessful());
+  }
+
   private static String createEntityAsString(String gnosId, String fileName, String projectCode) {
     return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"projectCode\":\"%s\"}", gnosId, fileName, projectCode);
+  }
+
+  /**
+   * Create Entity as string with no project code
+   * @param gnosId
+   * @param fileName
+   * @return
+   */
+  private static String createEntityAsString(String gnosId, String fileName) {
+    return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
   }
 
   private static Entity createEntity(String id, String gnosId, String fileName, String projectCode, long createdTime) {
