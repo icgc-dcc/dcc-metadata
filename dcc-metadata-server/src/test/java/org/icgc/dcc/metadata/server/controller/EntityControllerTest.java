@@ -62,6 +62,8 @@ public class EntityControllerTest {
   private static final String GNOS_ID_2 = "g321";
   private static final String FILE_NAME_2 = "f321";
   private static final String FILE_NAME_1 = "f123";
+  private static final String PROJECT_CODE_1 = "PROJ-CD1";
+  private static final String PROJECT_CODE_2 = "CODE-PRJ";
   private static final long CREATED_TIME = 0;
 
   @Mock
@@ -79,8 +81,8 @@ public class EntityControllerTest {
 
   @Before
   public void setUp() {
-    responseEntity1 = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, CREATED_TIME);
-    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2, CREATED_TIME);
+    responseEntity1 = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1, CREATED_TIME);
+    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2, PROJECT_CODE_1, CREATED_TIME);
 
     mockMvc = standaloneSetup(controller)
         .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -167,12 +169,19 @@ public class EntityControllerTest {
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1)))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(ID_1)))
         .andExpect(jsonPath("$.gnosId", is(GNOS_ID_1)))
         .andExpect(jsonPath("$.fileName", is(FILE_NAME_1)))
+        .andExpect(jsonPath("$.projectCode", is(PROJECT_CODE_1)))
         .andExpect(jsonPath("$.createdTime", is((int) CREATED_TIME)));
+  }
+
+  @Test
+  public void registerTest_missingProjectCode() throws Exception {
+    // when(service.register(any(Entity.class))).thenReturn(responseEntity1);
+    service.register(createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, null, CREATED_TIME));
   }
 
   @Test
@@ -182,20 +191,55 @@ public class EntityControllerTest {
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1)))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1)))
         .andExpect(status().isConflict())
         .andExpect(header().string(ENTITY_ID_HEADER, ID_1));
   }
 
-  private static String createEntityAsString(String gnosId, String fileName) {
-    return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
+  /**
+   * Trigger validation by registering a new Entity via REST client to endpoint
+   * @throws Exception
+   */
+  @Test
+  public void validationTest_withProjectCode() throws Exception {
+    // trigger validation - only happens when POSTing to endpoint
+    // doesn't work if invoking EntityController directly
+    mockMvc.perform(post("/entities")
+        .contentType(APPLICATION_JSON)
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1)))
+        .andExpect(status().is4xxClientError());
   }
 
-  private static Entity createEntity(String id, String gnosId, String fileName, long createdTime) {
+  @Test
+  public void validationTest_includingProjectCode() throws Exception {
+    // trigger validation - only happens when POSTing to endpoint
+    // doesn't work if invoking EntityController directly
+    mockMvc.perform(post("/entities")
+        .contentType(APPLICATION_JSON)
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, "RANDOM-PROJECT-CD")))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  private static String createEntityAsString(String gnosId, String fileName, String projectCode) {
+    return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"projectCode\":\"%s\"}", gnosId, fileName, projectCode);
+  }
+
+  /**
+   * Create Entity as string with no project code
+   * @param gnosId
+   * @param fileName
+   * @return
+   */
+  private static String createEntityAsString(String gnosId, String fileName) {
+    return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
+  }
+
+  private static Entity createEntity(String id, String gnosId, String fileName, String projectCode, long createdTime) {
     val result = new Entity();
     result.setId(id);
     result.setGnosId(gnosId);
     result.setFileName(fileName);
+    result.setProjectCode(projectCode);
     result.setCreatedTime(createdTime);
 
     return result;
