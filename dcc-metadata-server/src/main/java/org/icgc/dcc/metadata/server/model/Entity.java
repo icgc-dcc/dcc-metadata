@@ -39,6 +39,8 @@ public class Entity {
   @NotEmpty
   private String projectCode;
 
+  private String access;
+
   private Long createdTime;
 
 }

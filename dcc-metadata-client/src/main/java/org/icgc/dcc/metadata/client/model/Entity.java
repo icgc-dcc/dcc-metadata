@@ -30,4 +30,8 @@ public class Entity {
 
   private String fileName;
 
+  private String projectCode;
+
+  private String access;
+
 }
