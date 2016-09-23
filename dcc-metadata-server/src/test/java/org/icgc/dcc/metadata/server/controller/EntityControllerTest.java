@@ -64,6 +64,8 @@ public class EntityControllerTest {
   private static final String FILE_NAME_1 = "f123";
   private static final String PROJECT_CODE_1 = "PROJ-CD1";
   private static final String PROJECT_CODE_2 = "CODE-PRJ";
+  private static final String CONTROLLED = "controlled";
+  private static final String OPEN = "open";
   private static final long CREATED_TIME = 0;
 
   @Mock
@@ -81,8 +83,8 @@ public class EntityControllerTest {
 
   @Before
   public void setUp() {
-    responseEntity1 = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1, CREATED_TIME);
-    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2, PROJECT_CODE_1, CREATED_TIME);
+    responseEntity1 = createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1, CONTROLLED, CREATED_TIME);
+    responseEntity2 = createEntity(ID_2, GNOS_ID_2, FILE_NAME_2, PROJECT_CODE_1, CONTROLLED, CREATED_TIME);
 
     mockMvc = standaloneSetup(controller)
         .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -169,7 +171,7 @@ public class EntityControllerTest {
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1)))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1, CONTROLLED)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(ID_1)))
         .andExpect(jsonPath("$.gnosId", is(GNOS_ID_1)))
@@ -181,7 +183,7 @@ public class EntityControllerTest {
   @Test
   public void registerTest_missingProjectCode() throws Exception {
     // when(service.register(any(Entity.class))).thenReturn(responseEntity1);
-    service.register(createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, null, CREATED_TIME));
+    service.register(createEntity(ID_1, GNOS_ID_1, FILE_NAME_1, null, CONTROLLED, CREATED_TIME));
   }
 
   @Test
@@ -191,7 +193,7 @@ public class EntityControllerTest {
 
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1)))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, PROJECT_CODE_1, CONTROLLED)))
         .andExpect(status().isConflict())
         .andExpect(header().string(ENTITY_ID_HEADER, ID_1));
   }
@@ -201,12 +203,12 @@ public class EntityControllerTest {
    * @throws Exception
    */
   @Test
-  public void validationTest_withProjectCode() throws Exception {
+  public void validationTest_withoutProjectCode() throws Exception {
     // trigger validation - only happens when POSTing to endpoint
     // doesn't work if invoking EntityController directly
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1)))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, CONTROLLED)))
         .andExpect(status().is4xxClientError());
   }
 
@@ -216,12 +218,13 @@ public class EntityControllerTest {
     // doesn't work if invoking EntityController directly
     mockMvc.perform(post("/entities")
         .contentType(APPLICATION_JSON)
-        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, "RANDOM-PROJECT-CD")))
+        .content(createEntityAsString(GNOS_ID_1, FILE_NAME_1, "RANDOM-PROJECT-CD", CONTROLLED)))
         .andExpect(status().is2xxSuccessful());
   }
 
-  private static String createEntityAsString(String gnosId, String fileName, String projectCode) {
-    return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"projectCode\":\"%s\"}", gnosId, fileName, projectCode);
+  private static String createEntityAsString(String gnosId, String fileName, String projectCode, String access) {
+    return format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"projectCode\":\"%s\",\"access\":\"%s\"}", gnosId,
+        fileName, projectCode, access);
   }
 
   /**
@@ -230,16 +233,18 @@ public class EntityControllerTest {
    * @param fileName
    * @return
    */
-  private static String createEntityAsString(String gnosId, String fileName) {
-    return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\"}", gnosId, fileName);
+  private static String createEntityAsString(String gnosId, String fileName, String access) {
+    return String.format("{\"gnosId\":\"%s\",\"fileName\":\"%s\",\"access\":\"%s\"}", gnosId, fileName, access);
   }
 
-  private static Entity createEntity(String id, String gnosId, String fileName, String projectCode, long createdTime) {
+  private static Entity createEntity(String id, String gnosId, String fileName, String projectCode, String access,
+      long createdTime) {
     val result = new Entity();
     result.setId(id);
     result.setGnosId(gnosId);
     result.setFileName(fileName);
     result.setProjectCode(projectCode);
+    result.setAccess(access);
     result.setCreatedTime(createdTime);
 
     return result;
