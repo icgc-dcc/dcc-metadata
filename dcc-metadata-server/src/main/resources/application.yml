@@ -25,9 +25,8 @@ management:
   
 # Scopes that allow entities registration
 scopes:
-  - os.upload
-  - s3.upload
-  - tra.upload
+  - collab.upload
+  - aws.upload
 
 ---
 
