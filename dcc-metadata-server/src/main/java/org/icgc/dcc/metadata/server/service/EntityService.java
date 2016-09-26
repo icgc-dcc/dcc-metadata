@@ -52,6 +52,9 @@ public class EntityService {
     val id = resolveFileId(entity.getGnosId(), entity.getFileName());
     entity.setId(id);
     entity.setCreatedTime(System.currentTimeMillis());
+    if ((entity.getAccess() == null) || (entity.getAccess().isEmpty())) {
+      entity.setAccess("controlled");
+    }
 
     val registered = repository.save(entity);
     log.info("Successfully registered {}", entity);
