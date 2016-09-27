@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,34 +15,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.model;
+package org.icgc.dcc.metadata.core.model;
 
-import org.hibernate.validator.constraints.NotEmpty;
-import org.icgc.dcc.metadata.core.model.Access;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+public class Access {
 
-import lombok.Data;
-
-@Data
-@Document(collection = "Entity")
-public class Entity {
-
-  @Id
-  private String id;
-
-  @NotEmpty
-  private String gnosId;
-
-  @NotEmpty
-  private String fileName;
-
-  @NotEmpty
-  private String projectCode;
-
-  @NotEmpty
-  private String access = Access.CONTROLLED;
-
-  private Long createdTime;
-
+  public final static String OPEN = "open";
+  public final static String CONTROLLED = "controlled";
 }
