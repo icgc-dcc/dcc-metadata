@@ -22,7 +22,6 @@ import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import javax.validation.Valid;
 
@@ -37,7 +36,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,9 +62,8 @@ public class EntityController {
   @Autowired
   private final EntityService service;
 
-  @RequestMapping("/{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Entity> get(@PathVariable("id") String id) {
-
     val entity = repository.findOne(id);
     if (entity == null) {
       return new ResponseEntity<>(NOT_FOUND);
@@ -72,14 +72,13 @@ public class EntityController {
     return ResponseEntity.ok(entity);
   }
 
-  @RequestMapping
+  @GetMapping
   public ResponseEntity<Page<Entity>> find(
       @RequestParam(required = false) String gnosId,
       @RequestParam(required = false) String fileName,
       @RequestParam(required = false) String projectCode,
       @PageableDefault(sort = { "id" }) Pageable pageable) {
-
-    log.info("/find service invoked: gnosId = {}, fileName = {}, projectCode = {}", gnosId, fileName, projectCode);
+    log.debug("/find service invoked: gnosId = {}, fileName = {}, projectCode = {}", gnosId, fileName, projectCode);
 
     Page<Entity> entities = null;
 
@@ -110,7 +109,7 @@ public class EntityController {
     return repository.exists(id) ? ResponseEntity.ok(null) : new ResponseEntity<>(NOT_FOUND);
   }
 
-  @RequestMapping(method = POST)
+  @PostMapping
   public ResponseEntity<Entity> register(@RequestBody @Valid Entity entity) {
     try {
       return ResponseEntity.ok(service.register(entity));

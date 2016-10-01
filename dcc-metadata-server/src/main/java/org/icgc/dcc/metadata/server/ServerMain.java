@@ -18,69 +18,16 @@
  */
 package org.icgc.dcc.metadata.server;
 
-import static com.google.common.base.Strings.repeat;
-import static java.lang.System.err;
-
-import org.icgc.dcc.metadata.server.cli.ServerOptions;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 public class ServerMain {
 
-  /**
-   * Constants.
-   */
-  public static final String APPLICATION_NAME = "dcc-metadata-server";
-  public static final int SUCCESS_STATUS_CODE = 0;
-  public static final int FAILURE_STATUS_CODE = 1;
-
-  public static void main(String[] args) {
-    val options = new ServerOptions();
-    val cli = new JCommander(options);
-    cli.setAcceptUnknownOptions(true);
-    cli.setProgramName(APPLICATION_NAME);
-
-    try {
-      cli.parse(args);
-
-      banner("Running with {}", options);
-      execute(options, args);
-    } catch (ParameterException e) {
-      log.error("Invalid parameter(s): ", e);
-      err.println("Invalid parameter(s): " + e.getMessage());
-      usage(cli);
-    } catch (Exception e) {
-      log.error("Unknown error: ", e);
-      err.println("Unknow error. Please check the log for detailed error messages: " + e.getMessage());
-      System.exit(FAILURE_STATUS_CODE);
-    }
-  }
-
-  private static void execute(ServerOptions options, String[] args) {
+  public static void main(String... args) {
     SpringApplication.run(ServerMain.class, args);
-    log.info("{}\n", repeat("-", 100));
-  }
-
-  private static void usage(JCommander cli) {
-    val message = new StringBuilder();
-    cli.usage(message);
-    err.println(message.toString());
-  }
-
-  private static void banner(String message, Object... args) {
-    log.info("{}", repeat("-", 100));
-    log.info(message, args);
-    log.info("{}", repeat("-", 100));
   }
 
 }

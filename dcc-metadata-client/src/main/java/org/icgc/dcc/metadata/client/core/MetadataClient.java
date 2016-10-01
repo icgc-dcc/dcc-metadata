@@ -18,15 +18,11 @@
 package org.icgc.dcc.metadata.client.core;
 
 import static java.lang.System.out;
-import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
+import static org.icgc.dcc.common.core.util.Formats.formatCount;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
 import org.icgc.dcc.metadata.client.model.Entity;
@@ -35,6 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

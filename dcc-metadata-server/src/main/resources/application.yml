@@ -28,6 +28,9 @@ scopes:
   - collab.upload
   - aws.upload
 
+# Banner
+spring.main.banner-mode: log
+
 ---
 
 ###################################################################################################

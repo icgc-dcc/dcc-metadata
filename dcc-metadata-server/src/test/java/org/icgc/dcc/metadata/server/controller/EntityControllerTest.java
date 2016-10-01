@@ -63,9 +63,7 @@ public class EntityControllerTest {
   private static final String FILE_NAME_2 = "f321";
   private static final String FILE_NAME_1 = "f123";
   private static final String PROJECT_CODE_1 = "PROJ-CD1";
-  private static final String PROJECT_CODE_2 = "CODE-PRJ";
   private static final String CONTROLLED = "controlled";
-  private static final String OPEN = "open";
   private static final long CREATED_TIME = 0;
 
   @Mock
