@@ -45,20 +45,6 @@ spring:
 # Mongo
 spring.data.mongodb:
   uri: mongodb://localhost/dcc-metadata
-
----
-
-###################################################################################################
-# Development
-###################################################################################################
-
-# Spring
-spring:
-  profiles: development
-
-# Mongo
-spring.data.mongodb:
-  uri: mongodb://localhost/dcc-metadata  
    
 ---
 

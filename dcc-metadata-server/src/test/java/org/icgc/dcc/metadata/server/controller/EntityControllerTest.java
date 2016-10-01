@@ -50,6 +50,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import lombok.val;
 
@@ -92,7 +93,8 @@ public class EntityControllerTest {
   @Test
   public void findTest_all() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1, responseEntity2));
-    when(repository.findAll(any(Pageable.class))).thenReturn(page);
+    val params = ImmutableMap.<String, String> of();
+    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities"))
         .andExpect(status().isOk())
@@ -104,7 +106,8 @@ public class EntityControllerTest {
   @Test
   public void findTest_gnosId() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
-    when(repository.findByGnosId(eq(GNOS_ID_1), any(Pageable.class))).thenReturn(page);
+    val params = ImmutableMap.of("gnosId", GNOS_ID_1);
+    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities?gnosId=" + GNOS_ID_1))
         .andExpect(status().isOk())
@@ -117,6 +120,9 @@ public class EntityControllerTest {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     when(repository.findByFileName(eq(FILE_NAME_1), any(Pageable.class))).thenReturn(page);
 
+    val params = ImmutableMap.of("fileName", FILE_NAME_1);
+    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
+
     mockMvc.perform(get("/entities?fileName=" + FILE_NAME_1))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numberOfElements", is(1)))
@@ -126,7 +132,8 @@ public class EntityControllerTest {
   @Test
   public void findTest_fileName_gnosId() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
-    when(repository.findByGnosIdAndFileName(eq(GNOS_ID_1), eq(FILE_NAME_1), any(Pageable.class))).thenReturn(page);
+    val params = ImmutableMap.of("gnosId", GNOS_ID_1, "fileName", FILE_NAME_1);
+    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get(format("/entities?fileName=%s&gnosId=%s", FILE_NAME_1, GNOS_ID_1)))
         .andExpect(status().isOk())
