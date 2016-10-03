@@ -18,6 +18,7 @@
 package org.icgc.dcc.metadata.server.config;
 
 import org.icgc.dcc.metadata.server.ServerMain;
+import org.icgc.dcc.metadata.server.query.SimpleQueryMongoRepository;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
@@ -27,7 +28,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * See Spring annotation documentation for details.
  */
 @Configuration
-@EnableMongoRepositories(basePackageClasses = ServerMain.class)
+@EnableMongoRepositories(basePackageClasses = ServerMain.class, repositoryBaseClass = SimpleQueryMongoRepository.class)
 public class RepositoryConfig {
 
 }

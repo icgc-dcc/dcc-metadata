@@ -94,7 +94,7 @@ public class EntityControllerTest {
   public void findTest_all() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1, responseEntity2));
     val params = ImmutableMap.<String, String> of();
-    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
+    when(repository.findAll(eq(params), eq(null), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities"))
         .andExpect(status().isOk())
@@ -107,7 +107,7 @@ public class EntityControllerTest {
   public void findTest_gnosId() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     val params = ImmutableMap.of("gnosId", GNOS_ID_1);
-    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
+    when(repository.findAll(eq(params), eq(null), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities?gnosId=" + GNOS_ID_1))
         .andExpect(status().isOk())
@@ -121,7 +121,7 @@ public class EntityControllerTest {
     when(repository.findByFileName(eq(FILE_NAME_1), any(Pageable.class))).thenReturn(page);
 
     val params = ImmutableMap.of("fileName", FILE_NAME_1);
-    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
+    when(repository.findAll(eq(params), eq(null), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get("/entities?fileName=" + FILE_NAME_1))
         .andExpect(status().isOk())
@@ -133,7 +133,7 @@ public class EntityControllerTest {
   public void findTest_fileName_gnosId() throws Exception {
     val page = new PageImpl<Entity>(ImmutableList.of(responseEntity1));
     val params = ImmutableMap.of("gnosId", GNOS_ID_1, "fileName", FILE_NAME_1);
-    when(repository.findAll(eq(params), any(Pageable.class))).thenReturn(page);
+    when(repository.findAll(eq(params), eq(null), any(Pageable.class))).thenReturn(page);
 
     mockMvc.perform(get(format("/entities?fileName=%s&gnosId=%s", FILE_NAME_1, GNOS_ID_1)))
         .andExpect(status().isOk())

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,30 +15,30 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.server.util;
+package org.icgc.dcc.metadata.server.query;
 
-import ch.qos.logback.core.joran.spi.NoAutoStart;
-import ch.qos.logback.core.rolling.RolloverFailure;
-import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP;
+import java.io.Serializable;
 
-/**
- * See http://stackoverflow.com/questions/2492022/how-to-roll-the-log-file-on-startup-in-logback
- */
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
+import org.springframework.data.mongodb.core.query.Query;
 
-@NoAutoStart
-public class CustomStartupTriggeringPolicy<E> extends SizeAndTimeBasedFNATP<E> {
+public interface QueryExecutor<T, ID extends Serializable> {
 
-  @Override
-  public void start() {
-    super.start();
-    nextCheck = 0L;
-    isTriggeringEvent(null, null);
+  <S extends T> S findOne(CriteriaDefinition criteria);
 
-    try {
-      tbrp.rollover();
-    } catch (RolloverFailure e) {
-      // Do nothing
-    }
-  }
+  <S extends T> Iterable<S> findAll(CriteriaDefinition criteria);
+
+  <S extends T> Iterable<S> findAll(CriteriaDefinition criteria, Sort sort);
+
+  <S extends T> Page<S> findAll(Query query, Pageable pageable);
+
+  <S extends T> Page<S> findAll(CriteriaDefinition criteria, Pageable pageable);
+
+  <S extends T> long count(CriteriaDefinition criteria);
+
+  <S extends T> boolean exists(CriteriaDefinition criteria);
 
 }

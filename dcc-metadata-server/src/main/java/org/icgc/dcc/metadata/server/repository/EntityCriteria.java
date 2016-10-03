@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,23 +17,48 @@
  */
 package org.icgc.dcc.metadata.server.repository;
 
+import static com.google.common.base.Strings.emptyToNull;
+import static lombok.AccessLevel.PRIVATE;
+
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
 import org.icgc.dcc.metadata.server.model.Entity;
-import org.icgc.dcc.metadata.server.query.QueryExecutor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.domain.Example;
+import org.springframework.data.mongodb.core.query.Criteria;
 
-public interface EntityRepository extends MongoRepository<Entity, String>, QueryExecutor<Entity, String> {
+import com.google.common.collect.ImmutableList;
 
-  default Page<Entity> findAll(Map<String, String> params, List<String> fields, Pageable pageable) {
-    return findAll(EntityQuery.of(params, fields), pageable);
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+
+/**
+ * {@link Example} factory for {@link Entity}s.
+ */
+@NoArgsConstructor(access = PRIVATE)
+public final class EntityCriteria {
+
+  /**
+   * Constants.
+   */
+  @Getter(lazy = true, value = PRIVATE)
+  private static final List<Field> fields = ImmutableList.copyOf(Entity.class.getDeclaredFields());
+
+  public static Criteria of(@NonNull Map<String, String> params) {
+    Criteria criteria = new Criteria();
+    for (val field : getFields()) {
+      val propertyPath = field.getName();
+
+      if (!params.containsKey(propertyPath)) continue;
+
+      val value = emptyToNull(params.get(propertyPath));
+      criteria = criteria.and(propertyPath).is(value);
+    }
+
+    return criteria;
   }
-
-  Page<Entity> findByFileName(String fileName, Pageable pageable);
-
-  Entity findByGnosIdAndFileName(String gnosId, String fileName);
 
 }

@@ -28,6 +28,9 @@ scopes:
   - collab.upload
   - aws.upload
 
+# Jackson
+spring.jackson.default-property-inclusion: non_null
+
 # Banner
 spring.main.banner-mode: log
 

@@ -18,7 +18,6 @@
 package org.icgc.dcc.metadata.server.model;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.icgc.dcc.metadata.core.model.Access;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -41,7 +40,7 @@ public class Entity {
   private String projectCode;
 
   @NotEmpty
-  private String access = Access.CONTROLLED;
+  private String access;
 
   private Long createdTime;
 

@@ -22,6 +22,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.ResponseEntity.ok;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -74,9 +75,10 @@ public class EntityController {
 
   @GetMapping
   public ResponseEntity<Page<Entity>> find(
-      @RequestParam Map<String, String> params,
+      @RequestParam(required = false) Map<String, String> params,
+      @RequestParam(required = false) List<String> fields,
       @PageableDefault(sort = "id") Pageable pageable) {
-    return ok(repository.findAll(params, pageable));
+    return ok(repository.findAll(params, fields, pageable));
   }
 
   @PostMapping
