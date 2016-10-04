@@ -15,12 +15,15 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.core;
+package org.icgc.dcc.metadata.client.manifest;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Properties;
+
+import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
+
+import com.google.common.io.Files;
 
 import lombok.Cleanup;
 import lombok.NonNull;
@@ -28,37 +31,43 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.icgc.dcc.metadata.client.model.Entity;
-
 @RequiredArgsConstructor
 public class ManifestWriter {
 
-  @NonNull
-  private final File inputDir;
+  private final static String HEADER = "object-id\tfile-path\tmd5-checksum\n"; // Don't forget the line break!
+
   @NonNull
   private final File outputDir;
 
   @SneakyThrows
-  public void writeManifest(String manifestFileName, @NonNull List<Entity> entities) {
-    val manifest = new Properties();
-
-    for (val entity : entities) {
-      val filePath = getFilePath(entity);
-
-      manifest.put(entity.getId(), filePath);
+  public void writeManifest(@NonNull List<ManifestEntry> list) {
+    if (list.isEmpty()) {
+      return;
     }
 
-    val comments = "ICGC file manifest for " + inputDir.getName();
+    // Name manifest with GNOS id
+    val gnosId = list.get(0).getGnosId();
+
+    File outputManifest = new File(outputDir, gnosId);
 
     @Cleanup
-    val output = new FileOutputStream(new File(outputDir, manifestFileName));
-    manifest.store(output, comments);
+    val writer = Files.newWriter(outputManifest, StandardCharsets.UTF_8);
+    writer.write(HEADER);
+
+    for (val entity : list) {
+      writer.write(getManifestLine(entity));
+    }
   }
 
   @SneakyThrows
-  private String getFilePath(Entity entity) {
-    val file = new File(inputDir, entity.getFileName());
-    return file.getCanonicalPath();
+  private String getManifestLine(ManifestEntry entry) {
+    StringBuilder builder = new StringBuilder(entry.getObjectId())
+        .append("\t")
+        .append(entry.getFileName())
+        .append("\t")
+        .append(entry.getFileMd5sum())
+        .append("\n");
+    return builder.toString();
   }
 
 }

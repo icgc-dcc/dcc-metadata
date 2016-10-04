@@ -21,62 +21,58 @@ import static java.lang.System.out;
 import static org.icgc.dcc.common.core.util.Formats.formatCount;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import org.icgc.dcc.metadata.client.core.GNOSFileDirectoryReader.GNOSFile;
-import org.icgc.dcc.metadata.client.model.Entity;
+import org.icgc.dcc.metadata.client.manifest.ManifestService;
+import org.icgc.dcc.metadata.client.manifest.ManifestWriter;
+import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableList;
-
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@NoArgsConstructor
+@AllArgsConstructor
 public class MetadataClient {
 
   @Autowired
   private EntityRegistrationService registrationService;
 
+  @Autowired
+  private ManifestService manifestService;
+
   @SneakyThrows
-  public void register(File inputDir, File outputDir, String manifestFileName) {
-    out.printf("Reading %s directory%n", inputDir.getCanonicalPath());
-    out.printf("Saving manifest to %s/%s%n%n", outputDir.getCanonicalPath(), manifestFileName);
-    log.info("Regisitering: inputDir: {}, outputDir: {}, manifestFileName: {}",
-        inputDir.getCanonicalPath(),
-        outputDir.getCanonicalPath(),
-        manifestFileName);
+  public void register(File manifest, File outputDir) {
+    out.printf("Reading %s \n", manifest.getCanonicalPath());
 
-    log.info("Reading '{}' for files...", inputDir.getCanonicalPath());
-    val files = readFiles(inputDir);
-    log.info("Read {} files", formatCount(files));
+    val manifestFiles = manifestService.getUploadManifest(manifest);
 
-    val entities = register(files);
+    log.info("Read {} files", formatCount(manifestFiles.getEntries()));
 
-    val manifestWriter = new ManifestWriter(inputDir, outputDir);
-    manifestWriter.writeManifest(manifestFileName, entities);
+    // Register entries in Manifest and update with object id
+    register(manifestFiles.getEntries());
+
+    // need to add object id's to RegisterManifest
+    val manifestWriter = new ManifestWriter(outputDir);
+
+    manifestWriter.writeManifest(manifestFiles.getEntries());
   }
 
-  private List<Entity> register(List<GNOSFile> files) {
-    val registeredEntities = ImmutableList.<Entity> builder();
+  protected void register(List<ManifestEntry> manifestFiles) {
     int counter = 1;
 
-    for (val file : files) {
-      val entity = registrationService.register(file.getGnosId(), file.getFileName());
-      registeredEntities.add(entity);
-      out.printf("[%d/%d] Registered %s%n", counter++, files.size(), file.getFileName());
+    for (val file : manifestFiles) {
+      val entity = registrationService.register(file);
+      file.setObjectId(entity.getId());
+      out.printf("[%d/%d] Registered %s%n", counter++, manifestFiles.size(), file.getFileName());
     }
-
-    return registeredEntities.build();
-  }
-
-  private List<GNOSFile> readFiles(File gnosDir) throws IOException {
-    return new GNOSFileDirectoryReader().readFiles(gnosDir);
   }
 
 }

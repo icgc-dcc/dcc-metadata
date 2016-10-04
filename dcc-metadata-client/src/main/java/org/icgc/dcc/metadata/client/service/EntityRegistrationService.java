@@ -21,11 +21,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Paths;
+
+import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +33,11 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -46,8 +50,13 @@ public class EntityRegistrationService {
   @Autowired
   private RetryTemplate retryTemplate;
 
-  public Entity register(@NonNull String gnosId, @NonNull String fileName) {
-    val entity = new Entity().setGnosId(gnosId).setFileName(fileName);
+  public Entity register(@NonNull ManifestEntry file) {
+    // Strip any path information - not used in Metadata Server (but used by Metadata Client)
+    val fname = Paths.get(file.getFileName()).getFileName().toString();
+    val entity = new Entity().setGnosId(file.getGnosId())
+        .setProjectCode(file.getProjectCode())
+        .setFileName(fname)
+        .setAccess(file.getAccess());
 
     try {
       log.info("Posting: {}", entity);
