@@ -46,7 +46,7 @@ public class MetadataClient {
 
   @SneakyThrows
   public void register(File manifest, File outputDir) {
-    out.printf("Reading %s \n", manifest.getCanonicalPath());
+    out.printf("Reading %s %n", manifest.getCanonicalPath());
 
     val manifestFiles = manifestService.getUploadManifest(manifest);
 
