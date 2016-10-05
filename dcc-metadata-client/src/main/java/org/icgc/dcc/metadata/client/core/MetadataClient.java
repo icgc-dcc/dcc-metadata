@@ -55,7 +55,7 @@ public class MetadataClient {
     // Register entries in Manifest and update with object id
     register(manifestFiles.getEntries());
 
-    // need to add object id's to RegisterManifest
+    // Need to add object id's to RegisterManifest
     val manifestWriter = new ManifestWriter(outputDir);
 
     manifestWriter.writeManifest(manifestFiles.getEntries());
