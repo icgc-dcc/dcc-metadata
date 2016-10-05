@@ -34,11 +34,11 @@ import org.icgc.dcc.metadata.client.manifest.RegisterManifest;
 import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -64,6 +64,7 @@ public class MetadataClientTest {
   @Spy
   ManifestService manifestService;
 
+  @InjectMocks
   MetadataClient sut;
 
   public static ManifestEntry createEntry(String gnosId, String projectCode, String fileName, String md5,
@@ -89,11 +90,6 @@ public class MetadataClientTest {
     result.add(me3);
 
     return result;
-  }
-
-  @Before
-  public void setup() {
-    sut = new MetadataClient(restClient, manifestService);
   }
 
   @Test

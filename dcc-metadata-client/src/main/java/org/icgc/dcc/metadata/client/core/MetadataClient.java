@@ -30,16 +30,12 @@ import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@NoArgsConstructor
-@AllArgsConstructor
 public class MetadataClient {
 
   @Autowired
