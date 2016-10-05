@@ -66,7 +66,8 @@ public class MetadataClientTest {
 
   MetadataClient sut;
 
-  public ManifestEntry createEntry(String gnosId, String projectCode, String fileName, String md5, String access) {
+  public static ManifestEntry createEntry(String gnosId, String projectCode, String fileName, String md5,
+      String access) {
     return ManifestEntry.builder()
         .gnosId(gnosId)
         .projectCode(projectCode)

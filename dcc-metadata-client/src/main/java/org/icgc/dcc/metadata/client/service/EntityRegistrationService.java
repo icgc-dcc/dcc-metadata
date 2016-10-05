@@ -51,34 +51,33 @@ public class EntityRegistrationService {
   private RetryTemplate retryTemplate;
 
   public Entity register(@NonNull ManifestEntry file) {
-    // Strip any path information - not used in Metadata Server (but used by Metadata Client)
-    val fname = Paths.get(file.getFileName()).getFileName().toString();
-    val entity = new Entity().setGnosId(file.getGnosId())
-        .setProjectCode(file.getProjectCode())
-        .setFileName(fname)
-        .setAccess(file.getAccess());
+    val entity = buildEntity(file);
 
     try {
       log.info("Posting: {}", entity);
       val response = register(entity);
       log.info("Entity: {}", response);
-
       return response;
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == CONFLICT) {
         return resolveEntityId(entity, e.getResponseHeaders());
       }
-
       log.error("Unexpected response code {} creating entity {}", e.getStatusCode(), entity);
-
       throw e;
     }
+  }
+
+  Entity buildEntity(ManifestEntry file) {
+    val entity = new Entity().setGnosId(file.getGnosId())
+        .setProjectCode(file.getProjectCode())
+        .setFileName(scrubFileName(file.getFileName()))
+        .setAccess(file.getAccess());
+    return entity;
   }
 
   @SneakyThrows
   private Entity register(Entity entity) {
     val url = baseUrl + "/" + "entities";
-
     return retryTemplate.execute(context -> restTemplate.postForEntity(url, entity, Entity.class).getBody());
   }
 
@@ -99,4 +98,14 @@ public class EntityRegistrationService {
     return values.get(0);
   }
 
+  /**
+   * The manifests being generated need local path information to actually find the reference file. However, the
+   * Metadata Server must absolutely <i>not</i> use the paths as it will affect how the object id (UUID) is generated.
+   * 
+   * @param fileName - will be interpreted as a Path
+   * @return last part of the supplied path to a file
+   */
+  private static String scrubFileName(String fileName) {
+    return Paths.get(fileName).getFileName().toString();
+  }
 }
