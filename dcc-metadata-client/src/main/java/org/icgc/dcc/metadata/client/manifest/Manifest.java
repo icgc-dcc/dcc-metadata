@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,56 +17,29 @@
  */
 package org.icgc.dcc.metadata.client.manifest;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
-
-import com.google.common.io.Files;
-
-import lombok.Cleanup;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
+import lombok.Value;
 
-@RequiredArgsConstructor
-public class ManifestWriter {
-
-  private final static String HEADER = "object-id\tfile-path\tmd5-checksum\n"; // Don't forget the line break!
+@Value
+public class Manifest {
 
   @NonNull
-  private final File outputDir;
+  private final List<ManifestEntry> entries;
 
-  @SneakyThrows
-  public void writeManifest(@NonNull List<ManifestEntry> list) {
-    if (list.isEmpty()) {
-      return;
-    }
+  @Builder
+  @Data
+  public static class ManifestEntry {
 
-    // Name manifest with GNOS id
-    val gnosId = list.get(0).getGnosId();
+    String objectId;
+    String gnosId;
+    String projectCode;
+    String fileName;
+    String fileMd5sum;
+    String access;
 
-    File outputManifest = new File(outputDir, gnosId);
-
-    @Cleanup
-    val writer = Files.newWriter(outputManifest, StandardCharsets.UTF_8);
-    writer.write(HEADER);
-
-    for (val entity : list) {
-      writer.write(getManifestLine(entity));
-    }
   }
-
-  @SneakyThrows
-  public String getManifestLine(ManifestEntry entry) {
-    return entry.getObjectId()
-        .concat("\t")
-        .concat(entry.getFileName())
-        .concat("\t")
-        .concat(entry.getFileMd5sum())
-        .concat("\n");
-  }
-
 }

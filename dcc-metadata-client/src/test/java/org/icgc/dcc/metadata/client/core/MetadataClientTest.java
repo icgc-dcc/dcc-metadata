@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.icgc.dcc.metadata.client.manifest.ManifestService;
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest;
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
+import org.icgc.dcc.metadata.client.manifest.Manifest;
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.junit.Rule;
@@ -171,7 +171,7 @@ public class MetadataClientTest {
     assertThat(row3.get(2)).isEqualToIgnoringCase("919e4e8ffb31339718e7be032e8c8a85");
   }
 
-  protected String setupMetadataStubs(RegisterManifest manifest) {
+  protected String setupMetadataStubs(Manifest manifest) {
     String gnosId = "";
     int count = 1;
     for (val entry : manifest.getEntries()) {

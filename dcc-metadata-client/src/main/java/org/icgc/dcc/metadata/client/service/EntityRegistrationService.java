@@ -22,7 +22,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

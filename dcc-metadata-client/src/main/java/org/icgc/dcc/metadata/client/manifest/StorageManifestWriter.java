@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,29 +17,56 @@
  */
 package org.icgc.dcc.metadata.client.manifest;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.Value;
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 
-@Value
-public class RegisterManifest {
+import com.google.common.io.Files;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+
+@RequiredArgsConstructor
+public class StorageManifestWriter {
+
+  private final static String HEADER = "object-id\tfile-path\tmd5-checksum\n"; // Don't forget the line break!
 
   @NonNull
-  private final List<ManifestEntry> entries;
+  private final File outputDir;
 
-  @Builder
-  @Data
-  public static class ManifestEntry {
+  @SneakyThrows
+  public void writeManifest(@NonNull List<ManifestEntry> list) {
+    if (list.isEmpty()) {
+      return;
+    }
 
-    String objectId;
-    String gnosId;
-    String projectCode;
-    String fileName;
-    String fileMd5sum;
-    String access;
+    // Name manifest with GNOS id
+    val gnosId = list.get(0).getGnosId();
 
+    File storageManifest = new File(outputDir, gnosId);
+
+    @Cleanup
+    val writer = Files.newWriter(storageManifest, StandardCharsets.UTF_8);
+    writer.write(HEADER);
+
+    for (val entity : list) {
+      writer.write(getStorageManifestLine(entity));
+    }
   }
+
+  @SneakyThrows
+  public String getStorageManifestLine(ManifestEntry entry) {
+    return entry.getObjectId()
+        .concat("\t")
+        .concat(entry.getFileName())
+        .concat("\t")
+        .concat(entry.getFileMd5sum())
+        .concat("\n");
+  }
+
 }

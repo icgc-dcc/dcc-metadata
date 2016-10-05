@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -38,21 +38,21 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 
-public class RegisterManifestReader {
+public class ManifestReader {
 
   protected static final Splitter LINE_PARSER = Splitter.on('\t').trimResults();
 
   @SneakyThrows
-  public RegisterManifest readManifest(@NonNull File manifestFile) {
+  public Manifest readManifest(@NonNull File manifestFile) {
     return readManifest(manifestFile.toURI().toURL());
   }
 
   @SneakyThrows
-  public RegisterManifest readManifest(@NonNull URL manifestFile) {
+  public Manifest readManifest(@NonNull URL manifestFile) {
     return Resources.readLines(manifestFile, UTF_8, new ManifestLineProcessor());
   }
 
-  private class ManifestLineProcessor implements LineProcessor<RegisterManifest> {
+  private class ManifestLineProcessor implements LineProcessor<Manifest> {
 
     int count = 0;
     Builder<ManifestEntry> entries = ImmutableList.<ManifestEntry> builder();
@@ -72,8 +72,8 @@ public class RegisterManifestReader {
     }
 
     @Override
-    public RegisterManifest getResult() {
-      return new RegisterManifest(entries.build());
+    public Manifest getResult() {
+      return new Manifest(entries.build());
     }
   }
 

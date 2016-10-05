@@ -26,10 +26,10 @@ import lombok.SneakyThrows;
 @Service
 public class ManifestService {
 
-  private static final RegisterManifestReader UPLOAD_READER = new RegisterManifestReader();
+  private static final ManifestReader UPLOAD_READER = new ManifestReader();
 
   @SneakyThrows
-  public RegisterManifest getUploadManifest(File manifestFile) {
+  public Manifest getUploadManifest(File manifestFile) {
     return UPLOAD_READER.readManifest(manifestFile);
   }
 

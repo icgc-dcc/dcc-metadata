@@ -24,8 +24,8 @@ import java.io.File;
 import java.util.List;
 
 import org.icgc.dcc.metadata.client.manifest.ManifestService;
-import org.icgc.dcc.metadata.client.manifest.ManifestWriter;
-import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
+import org.icgc.dcc.metadata.client.manifest.StorageManifestWriter;
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +56,7 @@ public class MetadataClient {
     register(manifestFiles.getEntries());
 
     // Need to add object id's to RegisterManifest
-    val manifestWriter = new ManifestWriter(outputDir);
+    val manifestWriter = new StorageManifestWriter(outputDir);
 
     manifestWriter.writeManifest(manifestFiles.getEntries());
   }
