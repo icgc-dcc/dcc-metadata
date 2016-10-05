@@ -15,60 +15,58 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.core;
-
-import static java.lang.System.out;
-import static org.icgc.dcc.common.core.util.Formats.formatCount;
+package org.icgc.dcc.metadata.client.manifest;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.icgc.dcc.metadata.client.manifest.ManifestService;
-import org.icgc.dcc.metadata.client.manifest.StorageManifestWriter;
 import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
-import org.icgc.dcc.metadata.client.service.EntityRegistrationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import com.google.common.io.Files;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Component
-public class MetadataClient {
+@RequiredArgsConstructor
+public class StorageManifestWriter {
 
-  @Autowired
-  private EntityRegistrationService registrationService;
+  private final static String HEADER = "object-id\tfile-path\tmd5-checksum\n"; // Don't forget the line break!
 
-  @Autowired
-  private ManifestService manifestService;
+  @NonNull
+  private final File outputDir;
 
   @SneakyThrows
-  public void register(File manifest, File outputDir) {
-    out.printf("Reading %s %n", manifest.getCanonicalPath());
+  public void writeManifest(@NonNull List<ManifestEntry> list) {
+    if (list.isEmpty()) {
+      return;
+    }
 
-    val manifestFiles = manifestService.getUploadManifest(manifest);
+    // Name manifest with GNOS id
+    val gnosId = list.get(0).getGnosId();
 
-    log.info("Read {} files", formatCount(manifestFiles.getEntries()));
+    File storageManifest = new File(outputDir, gnosId);
 
-    // Register entries in Manifest and update with object id
-    register(manifestFiles.getEntries());
+    @Cleanup
+    val writer = Files.newWriter(storageManifest, StandardCharsets.UTF_8);
+    writer.write(HEADER);
 
-    // Need to add object id's to RegisterManifest
-    val manifestWriter = new StorageManifestWriter(outputDir);
-
-    manifestWriter.writeManifest(manifestFiles.getEntries());
+    for (val entity : list) {
+      writer.write(getStorageManifestLine(entity));
+    }
   }
 
-  protected void register(List<ManifestEntry> manifestFiles) {
-    int counter = 1;
-
-    for (val file : manifestFiles) {
-      val entity = registrationService.register(file);
-      file.setObjectId(entity.getId());
-      out.printf("[%d/%d] Registered %s%n", counter++, manifestFiles.size(), file.getFileName());
-    }
+  @SneakyThrows
+  public String getStorageManifestLine(ManifestEntry entry) {
+    return entry.getObjectId()
+        .concat("\t")
+        .concat(entry.getFileName())
+        .concat("\t")
+        .concat(entry.getFileMd5sum())
+        .concat("\n");
   }
 
 }

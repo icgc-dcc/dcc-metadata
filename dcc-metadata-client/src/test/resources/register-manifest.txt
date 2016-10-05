@@ -1,0 +1,4 @@
+gnos-id	project-code	filename	md5sum	access
+9cedfd57-1ef4-43c0-871c-709bdc87586e	GUMBY-POKEY	/data/to-be-uploaded/batch107/bb44b6d8-010d-473b-8037-91530a01c24f.seven-samurai.20150918.germline.indel.vcf.gz	c59cfd7bd38ccdb334c70f675ae18c76	controlled
+9cedfd57-1ef4-43c0-871c-709bdc87586e	GUMBY-POKEY	/data/to-be-uploaded/batch107/bb44b6d8-010d-473b-8037-91530a01c24f.seven-samurai.20150918.germline.indel.vcf.gz.idx	c09945110eb4e7063d8aff104c4b7aba	controlled
+9cedfd57-1ef4-43c0-871c-709bdc87586e	GUMBY-POKEY	/data/to-be-uploaded/batch107/bb44b6d8-010d-473b-8037-91530a01c24f.metadata.xml	919e4e8ffb31339718e7be032e8c8a85	controlled

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,50 +15,22 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.core;
+package org.icgc.dcc.metadata.client.manifest;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Properties;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import lombok.SneakyThrows;
-import lombok.val;
 
-import org.icgc.dcc.metadata.client.model.Entity;
+@Service
+public class ManifestService {
 
-@RequiredArgsConstructor
-public class ManifestWriter {
-
-  @NonNull
-  private final File inputDir;
-  @NonNull
-  private final File outputDir;
+  private static final ManifestReader UPLOAD_READER = new ManifestReader();
 
   @SneakyThrows
-  public void writeManifest(String manifestFileName, @NonNull List<Entity> entities) {
-    val manifest = new Properties();
-
-    for (val entity : entities) {
-      val filePath = getFilePath(entity);
-
-      manifest.put(entity.getId(), filePath);
-    }
-
-    val comments = "ICGC file manifest for " + inputDir.getName();
-
-    @Cleanup
-    val output = new FileOutputStream(new File(outputDir, manifestFileName));
-    manifest.store(output, comments);
-  }
-
-  @SneakyThrows
-  private String getFilePath(Entity entity) {
-    val file = new File(inputDir, entity.getFileName());
-    return file.getCanonicalPath();
+  public Manifest getUploadManifest(File manifestFile) {
+    return UPLOAD_READER.readManifest(manifestFile);
   }
 
 }

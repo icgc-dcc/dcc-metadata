@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2016 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,36 +15,30 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.metadata.client.cli;
+package org.icgc.dcc.metadata.client.manifest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 
-import com.beust.jcommander.Parameter;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import lombok.ToString;
+import lombok.val;
 
-@ToString
-public class ClientOptions {
+public class ManifestServiceTest {
 
-  /**
-   * Input
-   */
-  @Parameter(names = { "-m", "--manifest" }, help = true, description = "The tab-delimited file (GNOS id, project-code, filename, MD5-checksum) "
-      + " containing objects to register.")
-  public File manifestFile;
+  @Rule
+  public TemporaryFolder tmp = new TemporaryFolder();
 
-  /**
-   * Output
-   */
-  @Parameter(names = { "-o", "--output-dir" }, help = true, description = "The output directory")
-  public File outputDir;
+  @Test
+  public void test_read_input_manifest_format() {
+    val sut = new ManifestService();
+    val manifestFile = new File("src/test/resources/register-manifest.txt");
+    val registerManifest = sut.getUploadManifest(manifestFile);
 
-  /**
-   * Info
-   */
-  @Parameter(names = { "-v", "--version" }, help = true, description = "Show version information")
-  public boolean version;
-  @Parameter(names = { "-h", "--help" }, help = true, description = "Show help information")
-  public boolean help;
+    assertThat(registerManifest.getEntries().size()).isEqualTo(3);
+  }
 
 }

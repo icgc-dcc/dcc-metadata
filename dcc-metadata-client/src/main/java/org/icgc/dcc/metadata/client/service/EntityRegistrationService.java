@@ -21,19 +21,22 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.metadata.client.manifest.Manifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -46,30 +49,41 @@ public class EntityRegistrationService {
   @Autowired
   private RetryTemplate retryTemplate;
 
-  public Entity register(@NonNull String gnosId, @NonNull String fileName) {
-    val entity = new Entity().setGnosId(gnosId).setFileName(fileName);
+  public Entity register(@NonNull ManifestEntry file) {
+    val entity = buildEntity(file);
 
     try {
       log.info("Posting: {}", entity);
       val response = register(entity);
       log.info("Entity: {}", response);
-
       return response;
     } catch (HttpClientErrorException e) {
       if (e.getStatusCode() == CONFLICT) {
         return resolveEntityId(entity, e.getResponseHeaders());
       }
-
       log.error("Unexpected response code {} creating entity {}", e.getStatusCode(), entity);
-
       throw e;
     }
+  }
+
+  Entity buildEntity(ManifestEntry file) {
+    val fname = scrubFileName(file.getFileName());
+    if (StringUtils.isEmpty(fname)) {
+      val msg = String.format("Empty file name specified for Manifest Entry in bundle %s", file.getGnosId());
+      log.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
+
+    return new Entity()
+        .setGnosId(file.getGnosId())
+        .setProjectCode(file.getProjectCode())
+        .setFileName(scrubFileName(file.getFileName()))
+        .setAccess(file.getAccess());
   }
 
   @SneakyThrows
   private Entity register(Entity entity) {
     val url = baseUrl + "/" + "entities";
-
     return retryTemplate.execute(context -> restTemplate.postForEntity(url, entity, Entity.class).getBody());
   }
 
@@ -90,4 +104,14 @@ public class EntityRegistrationService {
     return values.get(0);
   }
 
+  /**
+   * The manifests being generated need local path information to actually find the reference file. However, the
+   * Metadata Server must absolutely <i>not</i> use the paths as it will affect how the object id (UUID) is generated.
+   * 
+   * @param fileName - will be interpreted as a Path
+   * @return last part of the supplied path to a file
+   */
+  private static String scrubFileName(String fileName) {
+    return StringUtils.getFilename(fileName);
+  }
 }

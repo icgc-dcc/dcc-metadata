@@ -21,8 +21,6 @@ import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.repeat;
 import static java.lang.System.err;
 import static java.lang.System.out;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.metadata.client.cli.ClientOptions;
 import org.icgc.dcc.metadata.client.core.MetadataClient;
@@ -32,6 +30,9 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootApplication
@@ -62,8 +63,8 @@ public class ClientMain {
         return;
       }
 
-      if (options.inputDir == null) {
-        err.println("The input directory is unset.");
+      if (options.manifestFile == null) {
+        err.println("Input manifest file is required.");
         return;
       }
 
@@ -82,7 +83,7 @@ public class ClientMain {
       System.exit(FAILURE_STATUS_CODE);
     } catch (Exception e) {
       log.error("Unknown error: ", e);
-      err.println("Unknow error. Please check the log for detailed error messages: " + e.getMessage());
+      err.println("Unknown error. Please check the log for detailed error messages: " + e.getMessage());
       System.exit(FAILURE_STATUS_CODE);
     }
   }
@@ -93,7 +94,7 @@ public class ClientMain {
     val client = context.getBean(MetadataClient.class);
     log.info("{}\n", repeat("-", 100));
 
-    client.register(options.inputDir, options.outputDir, options.manifestFileName);
+    client.register(options.manifestFile, options.outputDir);
   }
 
   private static void usage(JCommander cli) {
