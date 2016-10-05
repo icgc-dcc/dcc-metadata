@@ -40,5 +40,6 @@ public class RegisterManifest {
     String fileName;
     String fileMd5sum;
     String access;
+
   }
 }

@@ -60,14 +60,13 @@ public class ManifestWriter {
   }
 
   @SneakyThrows
-  private String getManifestLine(ManifestEntry entry) {
-    StringBuilder builder = new StringBuilder(entry.getObjectId())
-        .append("\t")
-        .append(entry.getFileName())
-        .append("\t")
-        .append(entry.getFileMd5sum())
-        .append("\n");
-    return builder.toString();
+  public String getManifestLine(ManifestEntry entry) {
+    return entry.getObjectId()
+        .concat("\t")
+        .concat(entry.getFileName())
+        .concat("\t")
+        .concat(entry.getFileMd5sum())
+        .concat("\n");
   }
 
 }

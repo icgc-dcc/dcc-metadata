@@ -35,13 +35,10 @@ public class ManifestServiceTest {
   @Test
   public void test_read_input_manifest_format() {
     val sut = new ManifestService();
-
     val manifestFile = new File("src/test/resources/register-manifest.txt");
-
     val registerManifest = sut.getUploadManifest(manifestFile);
 
     assertThat(registerManifest.getEntries().size()).isEqualTo(3);
-
   }
 
 }

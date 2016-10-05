@@ -50,6 +50,18 @@ public class EntityRegistrationServiceTest {
   public final static String PATH_NAME = "/path/to/the/actual/file.dat";
   public final static String FILE_NAME = "file.dat";
 
+  @Test(expected = IllegalArgumentException.class)
+  public void test_scrub_handle_empty_path_gracefully() {
+    val entry = MetadataClientTest.createEntry("gnos-id-1", "PROJ", "", "md5", "controlled");
+    val entity = sut.buildEntity(entry);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void test_scrub_handle_null_path_gracefully() {
+    val entry = MetadataClientTest.createEntry("gnos-id-1", "PROJ", null, "md5", "controlled");
+    val entity = sut.buildEntity(entry);
+  }
+
   @Test
   public void test_path_removal() {
     val entry = MetadataClientTest.createEntry("gnos-id-1", "PROJ", PATH_NAME, "md5", "controlled");

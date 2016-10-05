@@ -22,8 +22,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.icgc.dcc.metadata.core.http.Headers.ENTITY_ID_HEADER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 
-import java.nio.file.Paths;
-
 import org.icgc.dcc.metadata.client.manifest.RegisterManifest.ManifestEntry;
 import org.icgc.dcc.metadata.client.model.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -68,11 +67,18 @@ public class EntityRegistrationService {
   }
 
   Entity buildEntity(ManifestEntry file) {
-    val entity = new Entity().setGnosId(file.getGnosId())
+    val fname = scrubFileName(file.getFileName());
+    if (StringUtils.isEmpty(fname)) {
+      val msg = String.format("Empty file name specified for Manifest Entry in bundle %s", file.getGnosId());
+      log.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
+
+    return new Entity()
+        .setGnosId(file.getGnosId())
         .setProjectCode(file.getProjectCode())
         .setFileName(scrubFileName(file.getFileName()))
         .setAccess(file.getAccess());
-    return entity;
   }
 
   @SneakyThrows
@@ -106,6 +112,6 @@ public class EntityRegistrationService {
    * @return last part of the supplied path to a file
    */
   private static String scrubFileName(String fileName) {
-    return Paths.get(fileName).getFileName().toString();
+    return StringUtils.getFilename(fileName);
   }
 }
