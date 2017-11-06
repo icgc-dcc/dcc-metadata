@@ -8,9 +8,10 @@ Build
 
 From the command line:
 
-`cd dcc-metadata`
-
-`mvn clean package -DskipTests -am -pl :dcc-metadata-server`
+```bash
+cd dcc-metadata
+mvn clean package -DskipTests -am -pl :dcc-metadata-server
+```
 
 Run
 ---
