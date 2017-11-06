@@ -8,7 +8,9 @@ Build
 
 From the command line:
 
-	mvn package
+```bash
+mvn package
+```
 
 Run
 ---

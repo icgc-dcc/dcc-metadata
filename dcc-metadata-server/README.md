@@ -8,9 +8,10 @@ Build
 
 From the command line:
 
-`cd dcc-metadata`
-
-`mvn clean package -DskipTests -am -pl :dcc-metadata-server`
+```bash
+cd dcc-metadata
+mvn clean package -DskipTests -am -pl :dcc-metadata-server
+```
 
 Run
 ---
@@ -24,15 +25,15 @@ Examples
 
 ##### Save entity
 ```bash
-curl -k -XPOST https://localhost:8443/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt","projectCode":"ABCD-CA"}'
+curl -k -XPOST https://localhost:8443/entities -H "Content-Type: application/json" -d '{"gnosId":"zzz123","fileName":"1.txt","projectCode":"ABCD-CA","access":"open"}'
 ```
 
 ##### Find entities
 ```bash
-curl -k https://localhost:8443/entities?gnosId=zzz123&fileName=1.txt
+curl -k 'https://localhost:8443/entities?gnosId=zzz123&fileName=1.txt'
 ```
 
 ##### Get entity
 ```bash
-curl -k https://localhost:8443/entities/54321
+curl -k 'https://localhost:8443/entities/54321'
 ```
